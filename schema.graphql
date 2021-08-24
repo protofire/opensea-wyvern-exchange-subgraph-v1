@@ -1,0 +1,39 @@
+interface TimeUnit {
+  "internal id used for indexation"
+  id: ID!
+
+  "orders filled at this time candle"
+  orders: [Order!]!
+}
+
+type Minute implements TimeUnit @entity {
+  "internal id used for indexation"
+  id: ID!
+
+  "orders filled at this time candle"
+  orders: [Order!]! @derivedFrom(field: "minute")
+}
+
+type Hour implements TimeUnit @entity {
+  "internal id used for indexation"
+  id: ID!
+
+  "orders filled at this time candle"
+  orders: [Order!]! @derivedFrom(field: "hour")
+}
+
+type Day implements TimeUnit @entity {
+  "internal id used for indexation"
+  id: ID!
+
+  "orders filled at this time candle"
+  orders: [Order!]! @derivedFrom(field: "day")
+}
+
+type Week implements TimeUnit @entity {
+  "internal id used for indexation"
+  id: ID!
+
+  "orders filled at this time candle"
+  orders: [Order!]! @derivedFrom(field: "week")
+}
