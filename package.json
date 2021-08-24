@@ -1,6 +1,6 @@
 {
   "name": "opensea-wyvern-exchange-subgraph",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "scripts": {
     "codegen": "graph codegen",
     "build": "graph build",
