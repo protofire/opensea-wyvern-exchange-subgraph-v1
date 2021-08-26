@@ -29,11 +29,18 @@ type Day implements TimeUnit @entity {
   "orders filled at this time candle"
   orders: [Order!]! @derivedFrom(field: "day")
 }
-
 type Week implements TimeUnit @entity {
   "internal id used for indexation"
   id: ID!
 
   "orders filled at this time candle"
   orders: [Order!]! @derivedFrom(field: "week")
+}
+
+type Order @entity{
+  id: ID!
+  minute: Minute
+  hour: Hour
+  day: Day
+  week: Week
 }
