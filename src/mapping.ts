@@ -1,6 +1,4 @@
-import { date } from "@protofire/subgraph-toolkit"
 import {
-  openseaWyvernExchange,
   OrderApprovedPartOne,
   OrderApprovedPartTwo,
   OrderCancelled,
@@ -8,21 +6,37 @@ import {
   OwnershipRenounced,
   OwnershipTransferred
 } from "../generated/openseaWyvernExchange/openseaWyvernExchange"
-import { orders, timeSeries } from "./modules"
+import {
+  orders,
+  shared,
+  timeSeries
+} from "./modules"
 
 export function handleOrderApprovedPartOne(event: OrderApprovedPartOne): void {
   let timestamp = event.block.timestamp
   let order = orders.getOrCreateOrder(event.params.hash.toString())
 
-  let minuteEpoch = date.truncateMinutes(timestamp)
+  let minuteEpoch = shared.date.truncateMinutes(timestamp)
   let minute = timeSeries.minutes.getOrCreateMinute(minuteEpoch)
   minute.save()
   order.minute = minute.id
 
-  let hourEpoch = date.truncateHours(timestamp)
+  let hourEpoch = shared.date.truncateHours(timestamp)
   let hour = timeSeries.hours.getOrCreateHour(hourEpoch)
   hour.save()
   order.hour = hour.id
+
+  let dayEpoch = shared.date.truncateDays(timestamp)
+  let day = timeSeries.days.getOrCreateDay(dayEpoch)
+  day.save()
+  order.day = day.id
+
+  let weekEpoch = shared.date.truncateWeeks(timestamp)
+  let week = timeSeries.weeks.getOrCreateWeek(weekEpoch)
+  week.save()
+  order.week = week.id
+
+  order.save()
 
 
 }
