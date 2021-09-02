@@ -37,10 +37,101 @@ type Week implements TimeUnit @entity {
   orders: [Order!]! @derivedFrom(field: "week")
 }
 
-type Order @entity{
+type Account @entity {
+  "internal id used for indexation"
   id: ID!
+
+  "account's address"
+  address: Bytes
+
+  "orders that were made by this account"
+  makerOrders: [Order!]! @derivedFrom(field: "maker")
+  
+  "orders that were taken by this account"
+  takerOrders: [Order!]! @derivedFrom(field: "taker")
+
+
+}
+
+enum OrderStatus {
+  NONE
+  PART_ONE
+  PART_TWO
+  PART_THREE
+}
+
+enum FeeMethod { 
+  ProtocolFee
+  SplitFee
+}
+
+enum Side { 
+  Buy
+  Sell
+}
+
+enum SaleKind {
+  FixedPrice
+  DutchAuction
+}
+
+type Order @entity {
+  "internal id used for indexation"
+  id: ID!
+
+  "current data yield status"
+  status: OrderStatus!
+
+  "hased order content"
+  hash: Bytes
+
+  "TODO check this"
+  exchange: Bytes
+
+  "Account who made this order"
+  maker: Account
+
+  "Account who took this order"
+  taker: Account
+
+  "related minute entity"
   minute: Minute
+  
+  "maker paid fee for relayer"
+  makerRelayerFee: BigInt
+
+  "maker paid fee for protocol"
+  makerProtocolFee: BigInt
+
+  "taker paid fee for relayer"
+  takerRelayerFee: BigInt
+
+  "taker paid fee for protocol"
+  takerProtocolFee: BigInt
+
+  "Order fee recipient or zero address for taker order."
+  feeRecipient: Account
+
+  "Fee method (protocolfee or split fee)"
+  feeMethod: FeeMethod
+
+  "side: Is it buy or sell"
+  side: Side
+
+  "salkind: is it FixedPrice or DutchAuction"
+  saleKind: SaleKind
+
+  "TODO: not sure if it's an account"
+  target: Bytes
+
+  # time series relationships
+
+  "related hour entity"
   hour: Hour
+
+  "related day entity"
   day: Day
+
+  "related week entity"
   week: Week
 }
