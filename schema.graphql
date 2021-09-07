@@ -94,9 +94,6 @@ type Order @entity {
   "Account who took this order"
   taker: Account
 
-  "related minute entity"
-  minute: Minute
-  
   "maker paid fee for relayer"
   makerRelayerFee: BigInt
 
@@ -126,6 +123,9 @@ type Order @entity {
 
   # time series relationships
 
+  "related minute entity"
+  minute: Minute
+  
   "related hour entity"
   hour: Hour
 

@@ -36,9 +36,9 @@ export function handleOrderApprovedPartOne(event: OrderApprovedPartOne): void {
   week.save()
   order.week = week.id
 
+  order.status = orders.TRANSACTION_STATUS_PART_ONE
+
   order.save()
-
-
 }
 
 export function handleOrderApprovedPartTwo(event: OrderApprovedPartTwo): void { }
