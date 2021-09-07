@@ -85,7 +85,7 @@ type Order @entity {
   "hased order content"
   hash: Bytes
 
-  "TODO check this"
+  "Current contract exchange (fixed to 0x7be8076f4ea4a4ad08075c2508e481d6c946d12b, opensea wyvern address)"
   exchange: Bytes
 
   "Account who made this order"
@@ -118,7 +118,7 @@ type Order @entity {
   "salkind: is it FixedPrice or DutchAuction"
   saleKind: SaleKind
 
-  "TODO: not sure if it's an account"
+  "NFT contract address"
   target: Bytes
 
   # time series relationships

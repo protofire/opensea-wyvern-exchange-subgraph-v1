@@ -14,7 +14,7 @@ import {
 
 export function handleOrderApprovedPartOne(event: OrderApprovedPartOne): void {
   let timestamp = event.block.timestamp
-  let order = orders.getOrCreateOrder(event.params.hash.toString())
+  let order = orders.getOrCreateOrder(event.params.hash.toHex())
 
   let minuteEpoch = shared.date.truncateMinutes(timestamp)
   let minute = timeSeries.minutes.getOrCreateMinute(minuteEpoch)
@@ -37,6 +37,7 @@ export function handleOrderApprovedPartOne(event: OrderApprovedPartOne): void {
   order.week = week.id
 
   order.status = orders.TRANSACTION_STATUS_PART_ONE
+  order = orders.handleOrderPartOne(event.params, order)
 
   order.save()
 }

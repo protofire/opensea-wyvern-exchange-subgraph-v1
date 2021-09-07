@@ -20,13 +20,13 @@ export namespace orders {
 
 	export namespace helpers {
 
-		export function getFeeMethod(feeMethod: any): string {
+		export function getFeeMethod(feeMethod: i32): string {
 			return FEE_METHOD_PROTOCOL_FEE
 		}
-		export function getOrderSide(side: any): string {
+		export function getOrderSide(side: i32): string {
 			return SIDE_BUY
 		}
-		export function getSaleKind(kind: any): string {
+		export function getSaleKind(kind: i32): string {
 			return SALE_KIND_FIXEDPRICE
 		}
 	}
