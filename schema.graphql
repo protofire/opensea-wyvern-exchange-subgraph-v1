@@ -119,7 +119,7 @@ type Order @entity {
   saleKind: SaleKind
 
   "NFT contract address"
-  target: Bytes
+  target: Asset
 
   # time series relationships
 
@@ -134,4 +134,16 @@ type Order @entity {
 
   "related week entity"
   week: Week
+}
+
+type Asset @entity { 
+  "internal id used for indexation"
+  id: ID!
+
+  "asset contract's address"
+  address: Bytes
+
+  "all the orders where this asset was traded"
+  orders: [Order!]! @derivedFrom(field: "target")
+
 }

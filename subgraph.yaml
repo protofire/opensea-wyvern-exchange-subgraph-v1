@@ -1,4 +1,7 @@
 specVersion: 0.0.2
+repository: https://github.com/protofire/opensea-wyvern-exchange-subgraph
+description: This subgraph aims to be index the opensea exchange contract, including time series entities, erc transactions and ntf contracts address
+
 schema:
   file: ./schema.graphql
 dataSources:
