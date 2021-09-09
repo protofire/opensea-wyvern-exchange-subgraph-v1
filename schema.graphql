@@ -75,6 +75,13 @@ enum SaleKind {
   DutchAuction
 }
 
+enum HowToCall {
+  Call
+  DelegateCall
+}
+
+
+
 type Order @entity {
   "internal id used for indexation"
   id: ID!
@@ -120,6 +127,41 @@ type Order @entity {
 
   "NFT contract address"
   target: Asset
+
+  "Which kind of call enum"
+  howToCall: HowToCall
+
+  "additionl order call data"
+  callData: Bytes
+
+  "Calldata replacement pattern, or an empty byte array for no replacement."
+  replacementPattern: Bytes
+  
+  "Static call target, zero-address for no static call."
+  staticTarget: Bytes
+
+  "Static call extra data"
+  staticExtradata: Bytes
+
+  "Token used to pay for the order, or the zero-address as a sentinel value for Ether."
+  paymentToken: Bytes
+
+  "Base price of the order (in paymentTokens). "
+  basePrice: BigInt
+
+  "Auction extra parameter - minimum bid increment for English auctions, starting/ending price difference. "
+  extra: BigInt
+
+  "Listing timestamp"
+  listingTime: BigInt
+
+  "Expiration timestamp - 0 for no expiry"
+  expirationTIme: BigInt
+
+  "Order salt, used to prevent duplicate hashes."
+  salt: BigInt
+
+
 
   # time series relationships
 
