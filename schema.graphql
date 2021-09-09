@@ -37,10 +37,158 @@ type Week implements TimeUnit @entity {
   orders: [Order!]! @derivedFrom(field: "week")
 }
 
-type Order @entity{
+type Account @entity {
+  "internal id used for indexation"
   id: ID!
+
+  "account's address"
+  address: Bytes
+
+  "orders that were made by this account"
+  makerOrders: [Order!]! @derivedFrom(field: "maker")
+  
+  "orders that were taken by this account"
+  takerOrders: [Order!]! @derivedFrom(field: "taker")
+
+
+}
+
+enum OrderStatus {
+  NONE
+  PART_ONE
+  PART_TWO
+  PART_THREE
+}
+
+enum FeeMethod { 
+  ProtocolFee
+  SplitFee
+}
+
+enum Side { 
+  Buy
+  Sell
+}
+
+enum SaleKind {
+  FixedPrice
+  DutchAuction
+}
+
+enum HowToCall {
+  Call
+  DelegateCall
+}
+
+
+
+type Order @entity {
+  "internal id used for indexation"
+  id: ID!
+
+  "current data yield status"
+  status: OrderStatus!
+
+  "hased order content"
+  hash: Bytes
+
+  "Current contract exchange (fixed to 0x7be8076f4ea4a4ad08075c2508e481d6c946d12b, opensea wyvern address)"
+  exchange: Bytes
+
+  "Account who made this order"
+  maker: Account
+
+  "Account who took this order"
+  taker: Account
+
+  "maker paid fee for relayer"
+  makerRelayerFee: BigInt
+
+  "maker paid fee for protocol"
+  makerProtocolFee: BigInt
+
+  "taker paid fee for relayer"
+  takerRelayerFee: BigInt
+
+  "taker paid fee for protocol"
+  takerProtocolFee: BigInt
+
+  "Order fee recipient or zero address for taker order."
+  feeRecipient: Account
+
+  "Fee method (protocolfee or split fee)"
+  feeMethod: FeeMethod
+
+  "side: Is it buy or sell"
+  side: Side
+
+  "salkind: is it FixedPrice or DutchAuction"
+  saleKind: SaleKind
+
+  "NFT contract address"
+  target: Asset
+
+  "Which kind of call enum"
+  howToCall: HowToCall
+
+  "additionl order call data"
+  callData: Bytes
+
+  "Calldata replacement pattern, or an empty byte array for no replacement."
+  replacementPattern: Bytes
+  
+  "Static call target, zero-address for no static call."
+  staticTarget: Bytes
+
+  "Static call extra data"
+  staticExtradata: Bytes
+
+  "Token used to pay for the order, or the zero-address as a sentinel value for Ether."
+  paymentToken: Bytes
+
+  "Base price of the order (in paymentTokens). "
+  basePrice: BigInt
+
+  "Auction extra parameter - minimum bid increment for English auctions, starting/ending price difference. "
+  extra: BigInt
+
+  "Listing timestamp"
+  listingTime: BigInt
+
+  "Expiration timestamp - 0 for no expiry"
+  expirationTIme: BigInt
+
+  "Order salt, used to prevent duplicate hashes."
+  salt: BigInt
+
+  "Should be included in order book"
+  orderbookInclusionDesired: Boolean
+
+
+
+  # time series relationships
+
+  "related minute entity"
   minute: Minute
+  
+  "related hour entity"
   hour: Hour
+
+  "related day entity"
   day: Day
+
+  "related week entity"
   week: Week
+}
+
+type Asset @entity { 
+  "internal id used for indexation"
+  id: ID!
+
+  "asset contract's address"
+  address: Bytes
+
+  "all the orders where this asset was traded"
+  orders: [Order!]! @derivedFrom(field: "target")
+
 }

@@ -4,7 +4,7 @@ import { Day, Hour, Minute, Week } from "../../../generated/schema";
 export namespace timeSeries {
 	export namespace minutes {
 		export function getOrCreateMinute(epoch: BigInt): Minute {
-			let id = epoch.toString()
+			let id = "minute-".concat(epoch.toString())
 			let entity = Minute.load(id)
 			if (entity == null) {
 				entity = new Minute(id)
@@ -14,7 +14,7 @@ export namespace timeSeries {
 	}
 	export namespace hours {
 		export function getOrCreateHour(epoch: BigInt): Hour {
-			let id = epoch.toString()
+			let id = "hour-".concat(epoch.toString())
 			let entity = Hour.load(id)
 			if (entity == null) {
 				entity = new Hour(id)
@@ -24,7 +24,7 @@ export namespace timeSeries {
 	}
 	export namespace days {
 		export function getOrCreateDay(epoch: BigInt): Day {
-			let id = epoch.toString()
+			let id = "day-".concat(epoch.toString())
 			let entity = Day.load(id)
 			if (entity == null) {
 				entity = new Day(id)
@@ -34,7 +34,7 @@ export namespace timeSeries {
 	}
 	export namespace weeks {
 		export function getOrCreateWeek(epoch: BigInt): Week {
-			let id = epoch.toString()
+			let id = "week-".concat(epoch.toString())
 			let entity = Week.load(id)
 			if (entity == null) {
 				entity = new Week(id)
