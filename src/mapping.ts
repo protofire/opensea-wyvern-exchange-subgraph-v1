@@ -7,6 +7,7 @@ import {
   OwnershipTransferred
 } from "../generated/openseaWyvernExchange/openseaWyvernExchange"
 import {
+  assets,
   orders,
   shared,
   timeSeries
@@ -37,9 +38,15 @@ export function handleOrderApprovedPartOne(event: OrderApprovedPartOne): void {
   order.week = week.id
 
   order.status = orders.TRANSACTION_STATUS_PART_ONE
-  order = orders.handleOrderPartOne(event.params, order)
+
+  let asset = assets.getOrCreateAsset(event.params.target)
+  asset.save()
+  order = orders.handleOrderPartOne(event.params, order, asset.id)
 
   order.save()
+
+
+  asset.save()
 }
 
 export function handleOrderApprovedPartTwo(event: OrderApprovedPartTwo): void { }

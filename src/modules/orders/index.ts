@@ -40,7 +40,11 @@ export namespace orders {
 		return entity as Order
 	}
 
-	export function handleOrderPartOne(params: OrderApprovedPartOne__Params, order: Order): Order {
+	export function handleOrderPartOne(
+		params: OrderApprovedPartOne__Params,
+		order: Order,
+		assetId: string
+	): Order {
 		let entity = order
 		entity.status = TRANSACTION_STATUS_PART_ONE
 		entity.hash = params.hash
@@ -57,8 +61,7 @@ export namespace orders {
 		entity.side = helpers.getOrderSide(params.side)
 		entity.saleKind = helpers.getSaleKind(params.saleKind)
 		// 
-		entity.target = params.target
-
+		entity.target = assetId
 
 		return entity as Order
 	}
