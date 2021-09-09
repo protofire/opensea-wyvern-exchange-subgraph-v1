@@ -37,19 +37,19 @@ export function handleOrderApprovedPartOne(event: OrderApprovedPartOne): void {
   week.save()
   order.week = week.id
 
-  order.status = orders.TRANSACTION_STATUS_PART_ONE
-
   let asset = assets.getOrCreateAsset(event.params.target)
   asset.save()
+
   order = orders.handleOrderPartOne(event.params, order, asset.id)
-
   order.save()
-
-
-  asset.save()
 }
 
-export function handleOrderApprovedPartTwo(event: OrderApprovedPartTwo): void { }
+export function handleOrderApprovedPartTwo(event: OrderApprovedPartTwo): void {
+  let order = orders.getOrCreateOrder(event.params.hash.toHex())
+  order = orders.handleOrderPartTwo(event.params, order)
+  order.save()
+
+}
 
 export function handleOrderCancelled(event: OrderCancelled): void { }
 

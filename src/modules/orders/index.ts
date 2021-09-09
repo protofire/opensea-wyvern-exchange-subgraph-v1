@@ -1,4 +1,4 @@
-import { OrderApprovedPartOne__Params } from "../../../generated/openseaWyvernExchange/openseaWyvernExchange";
+import { OrderApprovedPartOne__Params, OrderApprovedPartTwo__Params } from "../../../generated/openseaWyvernExchange/openseaWyvernExchange";
 import { Order } from "../../../generated/schema";
 
 export namespace orders {
@@ -6,7 +6,6 @@ export namespace orders {
 	export let TRANSACTION_STATUS_NONE = "NONE"
 	export let TRANSACTION_STATUS_PART_ONE = "PART_ONE"
 	export let TRANSACTION_STATUS_PART_TWO = "PART_TWO"
-	export let TRANSACTION_STATUS_PART_THREE = "PART_THREE"
 
 	export let FEE_METHOD_PROTOCOL_FEE = "ProtocolFee"
 	export let FEE_METHOD_SPLIT_FEE = "SplitFee"
@@ -27,6 +26,9 @@ export namespace orders {
 			return SIDE_BUY
 		}
 		export function getSaleKind(kind: i32): string {
+			return SALE_KIND_FIXEDPRICE
+		}
+		export function getHowToCall(call: i32): string {
 			return SALE_KIND_FIXEDPRICE
 		}
 	}
@@ -62,6 +64,28 @@ export namespace orders {
 		entity.saleKind = helpers.getSaleKind(params.saleKind)
 		// 
 		entity.target = assetId
+
+		return entity as Order
+	}
+
+	export function handleOrderPartTwo(
+		params: OrderApprovedPartTwo__Params,
+		order: Order,
+	): Order {
+		let entity = order
+		entity.status = TRANSACTION_STATUS_PART_TWO
+		entity.howToCall = helpers.getHowToCall(params.howToCall)
+		entity.callData = params.calldata
+		entity.replacementPattern = params.replacementPattern
+		entity.staticTarget = params.staticTarget
+		entity.staticExtradata = params.staticExtradata
+		entity.paymentToken = params.paymentToken
+		entity.basePrice = params.basePrice
+		entity.extra = params.extra
+		entity.listingTime = params.listingTime
+		entity.expirationTIme = params.expirationTime
+		entity.salt = params.salt
+
 
 		return entity as Order
 	}

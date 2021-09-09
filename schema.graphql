@@ -161,6 +161,9 @@ type Order @entity {
   "Order salt, used to prevent duplicate hashes."
   salt: BigInt
 
+  "Should be included in order book"
+  orderbookInclusionDesired: Boolean
+
 
 
   # time series relationships
