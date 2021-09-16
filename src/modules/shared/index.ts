@@ -24,6 +24,11 @@ export namespace shared {
 			)
 			transaction.save()
 		}
+		export function i32ToString(int32: i32): string {
+			let val = BigInt.fromI32(int32).toString()
+			// log.info("@@@@@@  i32 to hex: " + hex, [])
+			return val
+		}
 	}
 	export namespace date {
 		export let ONE_MINUTE = BigInt.fromI32(SECONDS_IN_MINUTE)

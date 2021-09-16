@@ -1,5 +1,7 @@
+import { log } from "@graphprotocol/graph-ts";
 import { OrderApprovedPartOne__Params, OrderApprovedPartTwo__Params } from "../../../generated/openseaWyvernExchange/openseaWyvernExchange";
 import { Order } from "../../../generated/schema";
+import { shared } from "../shared";
 
 export namespace orders {
 
@@ -20,15 +22,22 @@ export namespace orders {
 	export namespace helpers {
 
 		export function getFeeMethod(feeMethod: i32): string {
+			log.info("getFeeMethod said: {}", [shared.helpers.i32ToString(feeMethod)])
 			return FEE_METHOD_PROTOCOL_FEE
 		}
 		export function getOrderSide(side: i32): string {
+			log.info("getOrderSide said: {}", [shared.helpers.i32ToString(side)])
+
 			return SIDE_BUY
 		}
 		export function getSaleKind(kind: i32): string {
+			log.info("getSaleKind said: {}", [shared.helpers.i32ToString(kind)])
+
 			return SALE_KIND_FIXEDPRICE
 		}
 		export function getHowToCall(call: i32): string {
+			log.info("getHowToCall said: {}", [shared.helpers.i32ToString(call)])
+
 			return "DelegateCall"
 		}
 	}
@@ -38,6 +47,7 @@ export namespace orders {
 		if (entity == null) {
 			entity = new Order(id)
 			entity.status = TRANSACTION_STATUS_NONE
+			entity.cancelled = false
 		}
 		return entity as Order
 	}
@@ -87,6 +97,12 @@ export namespace orders {
 		entity.salt = params.salt
 
 
+		return entity as Order
+	}
+
+	export function cancelOrder(id: string): Order {
+		let entity = getOrCreateOrder(id)
+		entity.cancelled = true
 		return entity as Order
 	}
 }
