@@ -15,6 +15,9 @@ type Block implements Metadata @entity {
 
 	"Chain transactions info"
 	transactions: [Transaction!] @derivedFrom(field: "block")
+
+	"Orders created on this block"
+	orders: [Order!] @derivedFrom(field: "block")
 }
 
 type Transaction implements Metadata @entity {
@@ -32,6 +35,9 @@ type Transaction implements Metadata @entity {
 
 	"Transaction's gas price"
   gasPrice: BigInt
+
+  "Orders created on this Transaction"
+	orders: [Order!] @derivedFrom(field: "transaction")
 }
 
 ##
@@ -206,7 +212,8 @@ type Order @entity {
   "Should be included in order book"
   orderbookInclusionDesired: Boolean
 
-
+  "was this order canceled"
+  cancelled: Boolean
 
   # time series relationships
 
@@ -221,6 +228,12 @@ type Order @entity {
 
   "related week entity"
   week: Week
+
+  "related block"
+  block: Block
+
+  "related transaction"
+  transaction: Transaction
 }
 
 type Asset @entity { 

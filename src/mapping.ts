@@ -42,6 +42,9 @@ export function handleOrderApprovedPartOne(event: OrderApprovedPartOne): void {
   let asset = assets.getOrCreateAsset(event.params.target)
   asset.save()
 
+  order.block = event.block.number.toString()
+  order.transaction = event.transaction.hash.toHex()
+
   order = orders.handleOrderPartOne(event.params, order, asset.id)
   order.save()
 }
