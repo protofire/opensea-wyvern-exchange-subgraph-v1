@@ -29,7 +29,7 @@ export namespace orders {
 			return SALE_KIND_FIXEDPRICE
 		}
 		export function getHowToCall(call: i32): string {
-			return SALE_KIND_FIXEDPRICE
+			return "DelegateCall"
 		}
 	}
 
