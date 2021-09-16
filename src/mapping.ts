@@ -14,6 +14,8 @@ import {
 } from "./modules"
 
 export function handleOrderApprovedPartOne(event: OrderApprovedPartOne): void {
+  shared.helpers.handleEvmMetadata(event)
+
   let timestamp = event.block.timestamp
   let order = orders.getOrCreateOrder(event.params.hash.toHex())
 
@@ -45,16 +47,27 @@ export function handleOrderApprovedPartOne(event: OrderApprovedPartOne): void {
 }
 
 export function handleOrderApprovedPartTwo(event: OrderApprovedPartTwo): void {
+  shared.helpers.handleEvmMetadata(event)
+
   let order = orders.getOrCreateOrder(event.params.hash.toHex())
   order = orders.handleOrderPartTwo(event.params, order)
   order.save()
 
 }
 
-export function handleOrderCancelled(event: OrderCancelled): void { }
+export function handleOrderCancelled(event: OrderCancelled): void {
+  shared.helpers.handleEvmMetadata(event)
+}
 
-export function handleOrdersMatched(event: OrdersMatched): void { }
+export function handleOrdersMatched(event: OrdersMatched): void {
+  shared.helpers.handleEvmMetadata(event)
 
-export function handleOwnershipRenounced(event: OwnershipRenounced): void { }
+}
 
-export function handleOwnershipTransferred(event: OwnershipTransferred): void { }
+export function handleOwnershipRenounced(event: OwnershipRenounced): void {
+  shared.helpers.handleEvmMetadata(event)
+}
+
+export function handleOwnershipTransferred(event: OwnershipTransferred): void {
+  shared.helpers.handleEvmMetadata(event)
+}
