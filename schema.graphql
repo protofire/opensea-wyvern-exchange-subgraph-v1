@@ -39,50 +39,7 @@ type Transaction implements Metadata @entity {
 # Time series
 
 ##
-interface Metadata {
-	"Internal ID used for indexation"
-	id: ID!
-}
 
-type Block implements Metadata @entity {
-	"Internal ID used for indexation"
-	id: ID!
-
-	"event timestamp"
-	timestamp: BigInt!	
-	
-	"Block's number"
-    number: BigInt!
-
-	"ERC721 Transactions contained in this block"
-	erc721Transactions: [TokenTransaction!] @derivedFrom(field: "block")
-
-	"ERC721 Transactions stored amount"
-	erc721TransactionsCount: BigInt
-
-	"Chain transactions info"
-	transactions: [Transaction!] @derivedFrom(field: "block")
-}
-
-type Transaction implements Metadata @entity {
-	"Internal ID used for indexation"
-	id: ID!
-
-	"Transaction's Block"
-	block: Block!
-
-	"Transaction's hash"
-	hash: Bytes
-
-	"Sender Address"
-	from: Bytes
-
-
-	"Transaction's gas price"
-    gasPrice: BigInt
-
-	approvals: [OperatorOwner!]!@derivedFrom(field: "transaction")
-}
 interface TimeUnit {
   "internal id used for indexation"
   id: ID!
