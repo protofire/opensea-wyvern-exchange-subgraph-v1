@@ -57,6 +57,8 @@ export function handleOrderApprovedPartTwo(event: OrderApprovedPartTwo): void {
 
 export function handleOrderCancelled(event: OrderCancelled): void {
   shared.helpers.handleEvmMetadata(event)
+  let order = orders.cancelOrder(event.params.hash.toHex())
+  order.save()
 }
 
 export function handleOrdersMatched(event: OrdersMatched): void {
@@ -65,9 +67,9 @@ export function handleOrdersMatched(event: OrdersMatched): void {
 }
 
 export function handleOwnershipRenounced(event: OwnershipRenounced): void {
-  shared.helpers.handleEvmMetadata(event)
+  // shared.helpers.handleEvmMetadata(event)
 }
 
 export function handleOwnershipTransferred(event: OwnershipTransferred): void {
-  shared.helpers.handleEvmMetadata(event)
+  // shared.helpers.handleEvmMetadata(event)
 }
