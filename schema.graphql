@@ -1,9 +1,73 @@
+interface Metadata {
+	"Internal ID used for indexation"
+	id: ID!
+}
+
+type Block implements Metadata @entity {
+	"Internal ID used for indexation"
+	id: ID!
+
+	"event timestamp"
+	timestamp: BigInt!	
+	
+	"Block's number"
+  number: BigInt!
+
+	"Chain transactions info"
+	transactions: [Transaction!] @derivedFrom(field: "block")
+
+	"Orders created on this block"
+	orders: [Order!] @derivedFrom(field: "block")
+
+  "related minute entity"
+  minute: Minute
+  
+  "related hour entity"
+  hour: Hour
+
+  "related day entity"
+  day: Day
+
+  "related week entity"
+  week: Week
+
+}
+
+type Transaction implements Metadata @entity {
+	"Internal ID used for indexation"
+	id: ID!
+
+	"Transaction's Block"
+	block: Block!
+
+	"Transaction's hash"
+	hash: Bytes
+
+	"Sender Address"
+	from: Bytes
+
+	"Transaction's gas price"
+  gasPrice: BigInt
+
+  "Orders created on this Transaction"
+	orders: [Order!] @derivedFrom(field: "transaction")
+}
+
+##
+
+# Time series
+
+##
+
 interface TimeUnit {
   "internal id used for indexation"
   id: ID!
 
   "orders filled at this time candle"
   orders: [Order!]!
+
+  "blocks signed at this thime candle"
+  blocks: [Block!]
 }
 
 type Minute implements TimeUnit @entity {
@@ -12,6 +76,9 @@ type Minute implements TimeUnit @entity {
 
   "orders filled at this time candle"
   orders: [Order!]! @derivedFrom(field: "minute")
+
+  "blocks signed at this thime candle"
+  blocks: [Block!] @derivedFrom(field: "minute")
 }
 
 type Hour implements TimeUnit @entity {
@@ -20,6 +87,9 @@ type Hour implements TimeUnit @entity {
 
   "orders filled at this time candle"
   orders: [Order!]! @derivedFrom(field: "hour")
+  
+  "blocks signed at this thime candle"
+  blocks: [Block!] @derivedFrom(field: "hour")
 }
 
 type Day implements TimeUnit @entity {
@@ -28,6 +98,9 @@ type Day implements TimeUnit @entity {
 
   "orders filled at this time candle"
   orders: [Order!]! @derivedFrom(field: "day")
+  
+  "blocks signed at this thime candle"
+  blocks: [Block!] @derivedFrom(field: "day")
 }
 type Week implements TimeUnit @entity {
   "internal id used for indexation"
@@ -35,6 +108,9 @@ type Week implements TimeUnit @entity {
 
   "orders filled at this time candle"
   orders: [Order!]! @derivedFrom(field: "week")
+
+  "blocks signed at this thime candle"
+  blocks: [Block!] @derivedFrom(field: "week")
 }
 
 type Account @entity {
@@ -164,7 +240,8 @@ type Order @entity {
   "Should be included in order book"
   orderbookInclusionDesired: Boolean
 
-
+  "was this order canceled"
+  cancelled: Boolean
 
   # time series relationships
 
@@ -179,6 +256,12 @@ type Order @entity {
 
   "related week entity"
   week: Week
+
+  "related block"
+  block: Block
+
+  "related transaction"
+  transaction: Transaction
 }
 
 type Asset @entity { 
