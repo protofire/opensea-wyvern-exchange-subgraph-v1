@@ -12,6 +12,7 @@ import {
   orders,
   shared,
   timeSeries,
+  tokens,
   transactions
 } from "./modules"
 
@@ -78,9 +79,14 @@ export function handleOrderApprovedPartOne(event: OrderApprovedPartOne): void {
 export function handleOrderApprovedPartTwo(event: OrderApprovedPartTwo): void {
   shared.helpers.handleEvmMetadata(event)
   // TODO event entity
+
+  let token = tokens.getOrCreateToken(event.params.paymentToken)
+  token.save()
+
   let order = orders.getOrCreateOrder(event.params.hash.toHex())
-  order = orders.handleOrderPartTwo(event.params, order)
+  order = orders.handleOrderPartTwo(event.params, order, token.id)
   order.save()
+
 
 }
 

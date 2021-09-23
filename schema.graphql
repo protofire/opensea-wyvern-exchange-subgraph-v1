@@ -220,7 +220,7 @@ type Order @entity {
   staticExtradata: Bytes
 
   "Token used to pay for the order, or the zero-address as a sentinel value for Ether."
-  paymentToken: Bytes
+  paymentToken: Token
 
   "Base price of the order (in paymentTokens). "
   basePrice: BigInt
@@ -273,5 +273,24 @@ type Asset @entity {
 
   "all the orders where this asset was traded"
   orders: [Order!]! @derivedFrom(field: "target")
+
+}
+interface Erc20Toekn {
+  "internal id used for indexation"
+  id: ID!
+
+  "asset contract's address"
+  address: Bytes
+}
+
+type Token implements Erc20Toekn @entity {
+  "internal id used for indexation"
+  id: ID!
+
+  "asset contract's address"
+  address: Bytes
+
+  "all the orders where this token was used to pay"
+  orders: [Order!]! @derivedFrom(field: "paymentToken")
 
 }
