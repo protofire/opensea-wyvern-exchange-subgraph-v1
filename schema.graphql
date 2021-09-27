@@ -126,7 +126,8 @@ type Account @entity {
   "orders that were taken by this account"
   takerOrders: [Order!]! @derivedFrom(field: "taker")
 
-
+  "balances in this account scop"
+  balances: [Balance!]! @derivedFrom(field: "account")
 }
 
 enum OrderStatus {
