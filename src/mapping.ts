@@ -8,6 +8,7 @@ import {
 } from "../generated/openseaWyvernExchange/openseaWyvernExchange"
 import {
   assets,
+  balances,
   blocks,
   orders,
   shared,
@@ -87,7 +88,9 @@ export function handleOrderApprovedPartTwo(event: OrderApprovedPartTwo): void {
   order = orders.handleOrderPartTwo(event.params, order, token.id)
   order.save()
 
-
+  let totalTakerAmount = shared.helpers.calcTotalTakerAmount(order)
+  let takerBalance = balances.increaseBalanceAmount(order.taker, order.paymentToken, totalTakerAmount)
+  takerBalance.save()
 }
 
 export function handleOrderCancelled(event: OrderCancelled): void {

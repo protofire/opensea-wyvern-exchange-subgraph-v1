@@ -1,4 +1,5 @@
 export * from "./assets"
+export * from "./balances"
 export * from "./blocks"
 export * from "./orders"
 export * from "./shared"

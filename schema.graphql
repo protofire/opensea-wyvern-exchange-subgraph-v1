@@ -294,3 +294,17 @@ type Token implements Erc20Toekn @entity {
   orders: [Order!]! @derivedFrom(field: "paymentToken")
 
 }
+
+type Balance @entity {
+  "internal id used for indexation"
+  id: ID!
+
+  "balance's owner"
+  account: Account!
+
+  "related token"
+  token: Token!
+
+  "token's amount"
+  amount: BigInt!
+}

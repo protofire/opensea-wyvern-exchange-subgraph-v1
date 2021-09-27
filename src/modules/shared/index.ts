@@ -1,5 +1,7 @@
 import { BigInt } from '@graphprotocol/graph-ts'
 import { ethereum } from "@graphprotocol/graph-ts";
+import { integer } from '@protofire/subgraph-toolkit';
+import { Order } from '../../../generated/schema';
 import { blocks, transactions } from "../index";
 
 export let SECONDS_IN_MINUTE = 60 * 60
@@ -28,6 +30,21 @@ export namespace shared {
 			let val = BigInt.fromI32(int32).toString()
 			// log.info("@@@@@@  i32 to hex: " + hex, [])
 			return val
+		}
+
+		export function getSafeNumber(val: BigInt | null): BigInt {
+			let number = val
+			if (number == null) {
+				number = integer.ZERO
+			}
+			return number as BigInt
+		}
+
+		export function calcTotalTakerAmount(order: Order): BigInt {
+			let basePrice = getSafeNumber(order.basePrice)
+			let takerProtocolFee = getSafeNumber(order.takerProtocolFee)
+			let takerRelayerFee = getSafeNumber(order.takerProtocolFee)
+			return basePrice.minus(takerRelayerFee).minus(takerProtocolFee)
 		}
 	}
 	export namespace date {
