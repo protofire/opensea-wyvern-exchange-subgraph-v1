@@ -3,7 +3,7 @@ interface Metadata {
 	id: ID!
 }
 
-interface Event implements Metadata @entity {
+interface Event {
   "Internal ID used for indexation"
 	id: ID!
 
