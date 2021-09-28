@@ -12,6 +12,7 @@ import {
   assets,
   balances,
   blocks,
+  events,
   orders,
   shared,
   timeSeries,
@@ -24,6 +25,7 @@ export function handleOrderApprovedPartOne(event: OrderApprovedPartOne): void {
 
   // 	shared.helpers.handleEvmMetadata(event)
   //  won't be used as block and tx are needed in scope
+
 
 
   let timestamp = event.block.timestamp
@@ -74,6 +76,16 @@ export function handleOrderApprovedPartOne(event: OrderApprovedPartOne): void {
   block.week = week.id
   block.save()
   order.block = blockId
+
+  let orderApprovedPartOneEvent = events.getOrCreateOrderApprovedPartOne(event.transactionLogIndex.toHex())
+  orderApprovedPartOneEvent.timestamp = timestamp
+  orderApprovedPartOneEvent.block = blockId
+  orderApprovedPartOneEvent.transaction = transaction.id
+  orderApprovedPartOneEvent.minute = minute.id
+  orderApprovedPartOneEvent.hour = hour.id
+  orderApprovedPartOneEvent.day = day.id
+  orderApprovedPartOneEvent.week = week.id
+  orderApprovedPartOneEvent.save()
 
   let maker = accounts.getOrCreateAccount(event.params.maker, txId)
   maker.lastUpdatedAt = txId

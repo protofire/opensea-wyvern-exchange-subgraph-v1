@@ -3,6 +3,43 @@ interface Metadata {
 	id: ID!
 }
 
+interface Event implements Metadata @entity {
+  "Internal ID used for indexation"
+	id: ID!
+
+  "event timestamp"
+	timestamp: BigInt!
+}
+
+type OrderApprovedPartOne implements Event @entity {
+  "Internal ID used for indexation"
+	id: ID!
+
+  "event timestamp"
+	timestamp: BigInt!
+
+  "related block"
+  block: Block
+
+  "related transaction"
+  transaction: Transaction
+
+  "related order"
+  order: Order
+
+  "related minute entity"
+  minute: Minute
+  
+  "related hour entity"
+  hour: Hour
+
+  "related day entity"
+  day: Day
+
+  "related week entity"
+  week: Week
+}
+
 type Block implements Metadata @entity {
 	"Internal ID used for indexation"
 	id: ID!
