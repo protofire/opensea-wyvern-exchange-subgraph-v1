@@ -1,3 +1,79 @@
+
+
+type Account @entity {
+  "internal id used for indexation"
+  id: ID!
+
+  "account's address"
+  address: Bytes
+
+  "orders that were made by this account"
+  makerOrders: [Order!]! @derivedFrom(field: "maker")
+  
+  "orders that were taken by this account"
+  takerOrders: [Order!]! @derivedFrom(field: "taker")
+
+  "balances in this account scop"
+  balances: [Balance!]! @derivedFrom(field: "account")
+
+  "evm metada transaction where this account was created"
+  createdAt: Transaction!
+
+  "evm metada transaction where this account was updated"
+  lastUpdatedAt: Transaction!
+}
+
+type Asset @entity { 
+  "internal id used for indexation"
+  id: ID!
+
+  "asset contract's address"
+  address: Bytes
+
+  "all the orders where this asset was traded"
+  orders: [Order!]! @derivedFrom(field: "target")
+
+}
+interface Erc20Toekn {
+  "internal id used for indexation"
+  id: ID!
+
+  "asset contract's address"
+  address: Bytes
+}
+
+type Token implements Erc20Toekn @entity {
+  "internal id used for indexation"
+  id: ID!
+
+  "asset contract's address"
+  address: Bytes
+
+  "all the orders where this token was used to pay"
+  orders: [Order!]! @derivedFrom(field: "paymentToken")
+
+}
+
+type Balance @entity {
+  "internal id used for indexation"
+  id: ID!
+
+  "balance's owner"
+  account: Account!
+
+  "related token"
+  token: Token!
+
+  "token's amount"
+  amount: BigInt!
+}
+
+##
+
+# events and metadata entities
+
+##
+
 interface Metadata {
 	"Internal ID used for indexation"
 	id: ID!
@@ -86,8 +162,8 @@ type Transaction implements Metadata @entity {
 	"Transaction's gas price"
   gasPrice: BigInt
 
-  "Orders created on this Transaction"
-	orders: [Order!] @derivedFrom(field: "transaction")
+  "Order created on this Transaction"
+	order: Order
 
   # time series relationships
 
@@ -309,72 +385,4 @@ type Order @entity {
 
   "related transaction"
   transaction: Transaction
-}
-
-type Account @entity {
-  "internal id used for indexation"
-  id: ID!
-
-  "account's address"
-  address: Bytes
-
-  "orders that were made by this account"
-  makerOrders: [Order!]! @derivedFrom(field: "maker")
-  
-  "orders that were taken by this account"
-  takerOrders: [Order!]! @derivedFrom(field: "taker")
-
-  "balances in this account scop"
-  balances: [Balance!]! @derivedFrom(field: "account")
-
-  "evm metada transaction where this account was created"
-  createdAt: Transaction!
-
-  "evm metada transaction where this account was updated"
-  lastUpdatedAt: Transaction!
-}
-
-type Asset @entity { 
-  "internal id used for indexation"
-  id: ID!
-
-  "asset contract's address"
-  address: Bytes
-
-  "all the orders where this asset was traded"
-  orders: [Order!]! @derivedFrom(field: "target")
-
-}
-interface Erc20Toekn {
-  "internal id used for indexation"
-  id: ID!
-
-  "asset contract's address"
-  address: Bytes
-}
-
-type Token implements Erc20Toekn @entity {
-  "internal id used for indexation"
-  id: ID!
-
-  "asset contract's address"
-  address: Bytes
-
-  "all the orders where this token was used to pay"
-  orders: [Order!]! @derivedFrom(field: "paymentToken")
-
-}
-
-type Balance @entity {
-  "internal id used for indexation"
-  id: ID!
-
-  "balance's owner"
-  account: Account!
-
-  "related token"
-  token: Token!
-
-  "token's amount"
-  amount: BigInt!
 }
