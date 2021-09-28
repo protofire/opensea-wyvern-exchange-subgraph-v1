@@ -51,6 +51,20 @@ type Transaction implements Metadata @entity {
 
   "Orders created on this Transaction"
 	orders: [Order!] @derivedFrom(field: "transaction")
+
+  # time series relationships
+
+  "related minute entity"
+  minute: Minute
+  
+  "related hour entity"
+  hour: Hour
+
+  "related day entity"
+  day: Day
+
+  "related week entity"
+  week: Week
 }
 
 ##
@@ -79,6 +93,9 @@ type Minute implements TimeUnit @entity {
 
   "blocks signed at this thime candle"
   blocks: [Block!] @derivedFrom(field: "minute")
+
+  "transactions created at this thime candle"
+  transactions: [Transaction!] @derivedFrom(field: "minute")
 }
 
 type Hour implements TimeUnit @entity {
@@ -90,6 +107,9 @@ type Hour implements TimeUnit @entity {
   
   "blocks signed at this thime candle"
   blocks: [Block!] @derivedFrom(field: "hour")
+
+  "transactions created at this thime candle"
+  transactions: [Transaction!] @derivedFrom(field: "hour")
 }
 
 type Day implements TimeUnit @entity {
@@ -101,6 +121,9 @@ type Day implements TimeUnit @entity {
   
   "blocks signed at this thime candle"
   blocks: [Block!] @derivedFrom(field: "day")
+
+  "transactions created at this thime candle"
+  transactions: [Transaction!] @derivedFrom(field: "day")
 }
 type Week implements TimeUnit @entity {
   "internal id used for indexation"
@@ -111,6 +134,9 @@ type Week implements TimeUnit @entity {
 
   "blocks signed at this thime candle"
   blocks: [Block!] @derivedFrom(field: "week")
+
+  "transactions created at this thime candle"
+  transactions: [Transaction!] @derivedFrom(field: "week")
 }
 
 enum OrderStatus {

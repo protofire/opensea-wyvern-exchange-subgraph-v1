@@ -60,6 +60,10 @@ export function handleOrderApprovedPartOne(event: OrderApprovedPartOne): void {
     event.transaction.from,
     event.transaction.gasPrice,
   )
+  transaction.minute = minute.id
+  transaction.hour = hour.id
+  transaction.day = day.id
+  transaction.week = week.id
   transaction.save()
   order.transaction = txId
 
