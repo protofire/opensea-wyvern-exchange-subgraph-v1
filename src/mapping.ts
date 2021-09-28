@@ -1,16 +1,21 @@
-
 import {
-  OrderApprovedPartOne
-} from "../../generated/openseaWyvernExchange/openseaWyvernExchange"
+  OrderApprovedPartOne,
+  OrderApprovedPartTwo,
+  OrderCancelled,
+  OrdersMatched,
+  OwnershipRenounced,
+  OwnershipTransferred
+} from "../generated/openseaWyvernExchange/openseaWyvernExchange"
 import {
   assets,
+  balances,
   blocks,
   orders,
   shared,
   timeSeries,
+  tokens,
   transactions
-} from "../modules"
-
+} from "./modules"
 
 export function handleOrderApprovedPartOne(event: OrderApprovedPartOne): void {
   let order = orders.getOrCreateOrder(event.params.hash.toHex())
@@ -70,4 +75,41 @@ export function handleOrderApprovedPartOne(event: OrderApprovedPartOne): void {
 
   order = orders.handleOrderPartOne(event.params, order, asset.id)
   order.save()
+}
+
+export function handleOrderApprovedPartTwo(event: OrderApprovedPartTwo): void {
+  shared.helpers.handleEvmMetadata(event)
+  // TODO event entity
+
+  let token = tokens.getOrCreateToken(event.params.paymentToken)
+  token.save()
+
+  let order = orders.getOrCreateOrder(event.params.hash.toHex())
+  order = orders.handleOrderPartTwo(event.params, order, token.id)
+  order.save()
+
+  let totalTakerAmount = shared.helpers.calcTotalTakerAmount(order)
+  let takerBalance = balances.increaseBalanceAmount(order.taker, order.paymentToken, totalTakerAmount)
+  takerBalance.save()
+}
+
+export function handleOrderCancelled(event: OrderCancelled): void {
+  shared.helpers.handleEvmMetadata(event)
+  // TODO event entity
+  let order = orders.cancelOrder(event.params.hash.toHex())
+  order.save()
+}
+
+export function handleOrdersMatched(event: OrdersMatched): void {
+  shared.helpers.handleEvmMetadata(event)
+  // TODO event entity
+
+}
+
+export function handleOwnershipRenounced(event: OwnershipRenounced): void {
+  // shared.helpers.handleEvmMetadata(event)
+}
+
+export function handleOwnershipTransferred(event: OwnershipTransferred): void {
+  // shared.helpers.handleEvmMetadata(event)
 }
