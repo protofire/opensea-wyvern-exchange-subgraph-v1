@@ -8,6 +8,7 @@ export namespace accounts {
 		let entity = Account.load(id)
 		if (entity == null) {
 			entity = new Account(id)
+			entity.address = address
 			entity.createdAt = txId
 		}
 		return entity as Account
