@@ -6,12 +6,17 @@ import {
   OwnershipRenounced,
   OwnershipTransferred
 } from "../generated/openseaWyvernExchange/openseaWyvernExchange"
+
 import {
+  accounts,
   assets,
+  balances,
   blocks,
+  events,
   orders,
   shared,
   timeSeries,
+  tokens,
   transactions
 } from "./modules"
 
@@ -20,6 +25,7 @@ export function handleOrderApprovedPartOne(event: OrderApprovedPartOne): void {
 
   // 	shared.helpers.handleEvmMetadata(event)
   //  won't be used as block and tx are needed in scope
+
 
 
   let timestamp = event.block.timestamp
@@ -56,6 +62,10 @@ export function handleOrderApprovedPartOne(event: OrderApprovedPartOne): void {
     event.transaction.from,
     event.transaction.gasPrice,
   )
+  transaction.minute = minute.id
+  transaction.hour = hour.id
+  transaction.day = day.id
+  transaction.week = week.id
   transaction.save()
   order.transaction = txId
 
@@ -67,21 +77,53 @@ export function handleOrderApprovedPartOne(event: OrderApprovedPartOne): void {
   block.save()
   order.block = blockId
 
+  let orderApprovedPartOneEvent = events.getOrCreateOrderApprovedPartOne(event.transactionLogIndex.toHex())
+  orderApprovedPartOneEvent.timestamp = timestamp
+  orderApprovedPartOneEvent.block = blockId
+  orderApprovedPartOneEvent.transaction = transaction.id
+  orderApprovedPartOneEvent.minute = minute.id
+  orderApprovedPartOneEvent.hour = hour.id
+  orderApprovedPartOneEvent.day = day.id
+  orderApprovedPartOneEvent.week = week.id
+  orderApprovedPartOneEvent.save()
+
+  let maker = accounts.getOrCreateAccount(event.params.maker, txId)
+  maker.lastUpdatedAt = txId
+  maker.save()
+  order.maker = maker.id
+
+  let taker = accounts.getOrCreateAccount(event.params.taker, txId)
+  taker.lastUpdatedAt = txId
+  taker.save()
+  order.taker = taker.id
+
   // TODO relate assets to time series
   let asset = assets.getOrCreateAsset(event.params.target)
   asset.save()
 
-  order = orders.handleOrderPartOne(event.params, order, asset.id)
+  order = orders.handleOrderPartOne(
+    event.params,
+    order,
+    asset.id
+  )
   order.save()
+
 }
 
 export function handleOrderApprovedPartTwo(event: OrderApprovedPartTwo): void {
   shared.helpers.handleEvmMetadata(event)
   // TODO event entity
+
+  let token = tokens.getOrCreateToken(event.params.paymentToken)
+  token.save()
+
   let order = orders.getOrCreateOrder(event.params.hash.toHex())
-  order = orders.handleOrderPartTwo(event.params, order)
+  order = orders.handleOrderPartTwo(event.params, order, token.id)
   order.save()
 
+  let totalTakerAmount = shared.helpers.calcTotalTakerAmount(order)
+  let takerBalance = balances.increaseBalanceAmount(order.taker, order.paymentToken, totalTakerAmount)
+  takerBalance.save()
 }
 
 export function handleOrderCancelled(event: OrderCancelled): void {

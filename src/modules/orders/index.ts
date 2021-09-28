@@ -1,7 +1,7 @@
 import { log } from "@graphprotocol/graph-ts";
 import { OrderApprovedPartOne__Params, OrderApprovedPartTwo__Params } from "../../../generated/openseaWyvernExchange/openseaWyvernExchange";
 import { Order } from "../../../generated/schema";
-import { shared } from "../shared";
+import { shared } from "..";
 
 export namespace orders {
 
@@ -61,8 +61,6 @@ export namespace orders {
 		entity.status = TRANSACTION_STATUS_PART_ONE
 		entity.hash = params.hash
 		entity.exchange = params.exchange
-		entity.maker = params.maker.toHex()
-		entity.taker = params.taker.toHex()
 		entity.makerRelayerFee = params.makerRelayerFee
 		entity.makerProtocolFee = params.makerProtocolFee
 		entity.takerRelayerFee = params.takerRelayerFee
@@ -81,6 +79,7 @@ export namespace orders {
 	export function handleOrderPartTwo(
 		params: OrderApprovedPartTwo__Params,
 		order: Order,
+		tokenId: string
 	): Order {
 		let entity = order
 		entity.status = TRANSACTION_STATUS_PART_TWO
@@ -89,7 +88,7 @@ export namespace orders {
 		entity.replacementPattern = params.replacementPattern
 		entity.staticTarget = params.staticTarget
 		entity.staticExtradata = params.staticExtradata
-		entity.paymentToken = params.paymentToken
+		entity.paymentToken = tokenId
 		entity.basePrice = params.basePrice
 		entity.extra = params.extra
 		entity.listingTime = params.listingTime

@@ -1,6 +1,119 @@
+
+
+type Account @entity {
+  "internal id used for indexation"
+  id: ID!
+
+  "account's address"
+  address: Bytes
+
+  "orders that were made by this account"
+  makerOrders: [Order!]! @derivedFrom(field: "maker")
+  
+  "orders that were taken by this account"
+  takerOrders: [Order!]! @derivedFrom(field: "taker")
+
+  "balances in this account scop"
+  balances: [Balance!]! @derivedFrom(field: "account")
+
+  "evm metada transaction where this account was created"
+  createdAt: Transaction!
+
+  "evm metada transaction where this account was updated"
+  lastUpdatedAt: Transaction!
+}
+
+type Asset @entity { 
+  "internal id used for indexation"
+  id: ID!
+
+  "asset contract's address"
+  address: Bytes
+
+  "all the orders where this asset was traded"
+  orders: [Order!]! @derivedFrom(field: "target")
+
+}
+interface Erc20Toekn {
+  "internal id used for indexation"
+  id: ID!
+
+  "asset contract's address"
+  address: Bytes
+}
+
+type Token implements Erc20Toekn @entity {
+  "internal id used for indexation"
+  id: ID!
+
+  "asset contract's address"
+  address: Bytes
+
+  "all the orders where this token was used to pay"
+  orders: [Order!]! @derivedFrom(field: "paymentToken")
+
+}
+
+type Balance @entity {
+  "internal id used for indexation"
+  id: ID!
+
+  "balance's owner"
+  account: Account!
+
+  "related token"
+  token: Token!
+
+  "token's amount"
+  amount: BigInt!
+}
+
+##
+
+# events and metadata entities
+
+##
+
 interface Metadata {
 	"Internal ID used for indexation"
 	id: ID!
+}
+
+interface Event {
+  "Internal ID used for indexation"
+	id: ID!
+
+  "event timestamp"
+	timestamp: BigInt!
+}
+
+type OrderApprovedPartOne implements Event @entity {
+  "Internal ID used for indexation"
+	id: ID!
+
+  "event timestamp"
+	timestamp: BigInt!
+
+  "related block"
+  block: Block
+
+  "related transaction"
+  transaction: Transaction
+
+  "related order"
+  order: Order
+
+  "related minute entity"
+  minute: Minute
+  
+  "related hour entity"
+  hour: Hour
+
+  "related day entity"
+  day: Day
+
+  "related week entity"
+  week: Week
 }
 
 type Block implements Metadata @entity {
@@ -49,8 +162,22 @@ type Transaction implements Metadata @entity {
 	"Transaction's gas price"
   gasPrice: BigInt
 
-  "Orders created on this Transaction"
-	orders: [Order!] @derivedFrom(field: "transaction")
+  "Order created on this Transaction"
+	order: Order
+
+  # time series relationships
+
+  "related minute entity"
+  minute: Minute
+  
+  "related hour entity"
+  hour: Hour
+
+  "related day entity"
+  day: Day
+
+  "related week entity"
+  week: Week
 }
 
 ##
@@ -79,6 +206,9 @@ type Minute implements TimeUnit @entity {
 
   "blocks signed at this thime candle"
   blocks: [Block!] @derivedFrom(field: "minute")
+
+  "transactions created at this thime candle"
+  transactions: [Transaction!] @derivedFrom(field: "minute")
 }
 
 type Hour implements TimeUnit @entity {
@@ -90,6 +220,9 @@ type Hour implements TimeUnit @entity {
   
   "blocks signed at this thime candle"
   blocks: [Block!] @derivedFrom(field: "hour")
+
+  "transactions created at this thime candle"
+  transactions: [Transaction!] @derivedFrom(field: "hour")
 }
 
 type Day implements TimeUnit @entity {
@@ -101,6 +234,9 @@ type Day implements TimeUnit @entity {
   
   "blocks signed at this thime candle"
   blocks: [Block!] @derivedFrom(field: "day")
+
+  "transactions created at this thime candle"
+  transactions: [Transaction!] @derivedFrom(field: "day")
 }
 type Week implements TimeUnit @entity {
   "internal id used for indexation"
@@ -111,22 +247,9 @@ type Week implements TimeUnit @entity {
 
   "blocks signed at this thime candle"
   blocks: [Block!] @derivedFrom(field: "week")
-}
 
-type Account @entity {
-  "internal id used for indexation"
-  id: ID!
-
-  "account's address"
-  address: Bytes
-
-  "orders that were made by this account"
-  makerOrders: [Order!]! @derivedFrom(field: "maker")
-  
-  "orders that were taken by this account"
-  takerOrders: [Order!]! @derivedFrom(field: "taker")
-
-
+  "transactions created at this thime candle"
+  transactions: [Transaction!] @derivedFrom(field: "week")
 }
 
 enum OrderStatus {
@@ -220,7 +343,7 @@ type Order @entity {
   staticExtradata: Bytes
 
   "Token used to pay for the order, or the zero-address as a sentinel value for Ether."
-  paymentToken: Bytes
+  paymentToken: Token
 
   "Base price of the order (in paymentTokens). "
   basePrice: BigInt
@@ -262,16 +385,4 @@ type Order @entity {
 
   "related transaction"
   transaction: Transaction
-}
-
-type Asset @entity { 
-  "internal id used for indexation"
-  id: ID!
-
-  "asset contract's address"
-  address: Bytes
-
-  "all the orders where this asset was traded"
-  orders: [Order!]! @derivedFrom(field: "target")
-
 }
