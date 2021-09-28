@@ -61,8 +61,6 @@ export namespace orders {
 		entity.status = TRANSACTION_STATUS_PART_ONE
 		entity.hash = params.hash
 		entity.exchange = params.exchange
-		entity.maker = params.maker.toHex()
-		entity.taker = params.taker.toHex()
 		entity.makerRelayerFee = params.makerRelayerFee
 		entity.makerProtocolFee = params.makerProtocolFee
 		entity.takerRelayerFee = params.takerRelayerFee

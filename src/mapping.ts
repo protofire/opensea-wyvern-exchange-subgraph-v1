@@ -6,7 +6,9 @@ import {
   OwnershipRenounced,
   OwnershipTransferred
 } from "../generated/openseaWyvernExchange/openseaWyvernExchange"
+
 import {
+  accounts,
   assets,
   balances,
   blocks,
@@ -69,12 +71,25 @@ export function handleOrderApprovedPartOne(event: OrderApprovedPartOne): void {
   block.save()
   order.block = blockId
 
+  let maker = accounts.getOrCreateAccount(event.params.maker)
+  maker.save()
+  order.maker = maker.id
+
+  let taker = accounts.getOrCreateAccount(event.params.taker)
+  taker.save()
+  order.taker = taker.id
+
   // TODO relate assets to time series
   let asset = assets.getOrCreateAsset(event.params.target)
   asset.save()
 
-  order = orders.handleOrderPartOne(event.params, order, asset.id)
+  order = orders.handleOrderPartOne(
+    event.params,
+    order,
+    asset.id
+  )
   order.save()
+
 }
 
 export function handleOrderApprovedPartTwo(event: OrderApprovedPartTwo): void {
