@@ -71,11 +71,13 @@ export function handleOrderApprovedPartOne(event: OrderApprovedPartOne): void {
   block.save()
   order.block = blockId
 
-  let maker = accounts.getOrCreateAccount(event.params.maker)
+  let maker = accounts.getOrCreateAccount(event.params.maker, txId)
+  maker.lastUpdatedAt = txId
   maker.save()
   order.maker = maker.id
 
-  let taker = accounts.getOrCreateAccount(event.params.taker)
+  let taker = accounts.getOrCreateAccount(event.params.taker, txId)
+  taker.lastUpdatedAt = txId
   taker.save()
   order.taker = taker.id
 

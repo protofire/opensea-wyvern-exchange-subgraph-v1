@@ -113,23 +113,6 @@ type Week implements TimeUnit @entity {
   blocks: [Block!] @derivedFrom(field: "week")
 }
 
-type Account @entity {
-  "internal id used for indexation"
-  id: ID!
-
-  "account's address"
-  address: Bytes
-
-  "orders that were made by this account"
-  makerOrders: [Order!]! @derivedFrom(field: "maker")
-  
-  "orders that were taken by this account"
-  takerOrders: [Order!]! @derivedFrom(field: "taker")
-
-  "balances in this account scop"
-  balances: [Balance!]! @derivedFrom(field: "account")
-}
-
 enum OrderStatus {
   NONE
   PART_ONE
@@ -263,6 +246,29 @@ type Order @entity {
 
   "related transaction"
   transaction: Transaction
+}
+
+type Account @entity {
+  "internal id used for indexation"
+  id: ID!
+
+  "account's address"
+  address: Bytes
+
+  "orders that were made by this account"
+  makerOrders: [Order!]! @derivedFrom(field: "maker")
+  
+  "orders that were taken by this account"
+  takerOrders: [Order!]! @derivedFrom(field: "taker")
+
+  "balances in this account scop"
+  balances: [Balance!]! @derivedFrom(field: "account")
+
+  "evm metada transaction where this account was created"
+  createdAt: Transaction!
+
+  "evm metada transaction where this account was updated"
+  lastUpdatedAt: Transaction!
 }
 
 type Asset @entity { 
