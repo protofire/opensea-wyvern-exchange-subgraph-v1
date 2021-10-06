@@ -225,10 +225,16 @@ type Week implements TimeUnit @entity {
   transactions: [Transaction!] @derivedFrom(field: "week")
 }
 
-enum OrderStatus {
+enum ContractOrderYieldStatus {
   NONE
   PART_ONE
   PART_TWO
+}
+
+enum OrderStatus {
+  NONE
+  OPEN
+  FILLED
 }
 
 enum FeeMethod { 
@@ -257,7 +263,9 @@ type Order @entity {
   "internal id used for indexation"
   id: ID!
 
-  "current data yield status"
+  "current data yield status as thrown by contract"
+  yieldStatus: ContractOrderYieldStatus!
+
   status: OrderStatus!
 
   "hased order content"

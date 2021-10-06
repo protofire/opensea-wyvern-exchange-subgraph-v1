@@ -121,10 +121,6 @@ export function handleOrderApprovedPartTwo(event: OrderApprovedPartTwo): void {
   let order = orders.getOrCreateOrder(event.params.hash.toHex())
   order = orders.handleOrderPartTwo(event.params, order, token.id)
   order.save()
-
-  let totalTakerAmount = shared.helpers.calcTotalTakerAmount(order)
-  let takerBalance = balances.increaseBalanceAmount(order.taker, order.paymentToken, totalTakerAmount)
-  takerBalance.save()
 }
 
 export function handleOrderCancelled(event: OrderCancelled): void {
@@ -137,6 +133,9 @@ export function handleOrderCancelled(event: OrderCancelled): void {
 export function handleOrdersMatched(event: OrdersMatched): void {
   shared.helpers.handleEvmMetadata(event)
   // TODO event entity
+  // let totalTakerAmount = shared.helpers.calcTotalTakerAmount(order)
+  // let takerBalance = balances.increaseBalanceAmount(order.taker, order.paymentToken, totalTakerAmount)
+  // takerBalance.save()
 
 }
 

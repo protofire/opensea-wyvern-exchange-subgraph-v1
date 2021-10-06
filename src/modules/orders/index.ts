@@ -5,9 +5,13 @@ import { shared } from "..";
 
 export namespace orders {
 
-	export let TRANSACTION_STATUS_NONE = "NONE"
-	export let TRANSACTION_STATUS_PART_ONE = "PART_ONE"
-	export let TRANSACTION_STATUS_PART_TWO = "PART_TWO"
+	export let ORDER_STATUS_NONE = "NONE"
+	export let ORDER_STATUS_OPEN = "OPEN"
+	export let ORDER_STATUS_FILLED = "FILLED"
+
+	export let YIELD_STATUS_NONE = "NONE"
+	export let YIELD_STATUS_PART_ONE = "PART_ONE"
+	export let YIELD_STATUS_PART_TWO = "PART_TWO"
 
 	export let FEE_METHOD_PROTOCOL_FEE = "ProtocolFee"
 	export let FEE_METHOD_SPLIT_FEE = "SplitFee"
@@ -46,7 +50,8 @@ export namespace orders {
 		let entity = Order.load(id)
 		if (entity == null) {
 			entity = new Order(id)
-			entity.status = TRANSACTION_STATUS_NONE
+			entity.status = ORDER_STATUS_NONE
+			entity.yieldStatus = YIELD_STATUS_NONE
 			entity.cancelled = false
 		}
 		return entity as Order
@@ -58,7 +63,8 @@ export namespace orders {
 		assetId: string
 	): Order {
 		let entity = order
-		entity.status = TRANSACTION_STATUS_PART_ONE
+		entity.yieldStatus = YIELD_STATUS_PART_ONE
+		entity.status = ORDER_STATUS_OPEN
 		entity.hash = params.hash
 		entity.exchange = params.exchange
 		entity.makerRelayerFee = params.makerRelayerFee
@@ -82,7 +88,7 @@ export namespace orders {
 		tokenId: string
 	): Order {
 		let entity = order
-		entity.status = TRANSACTION_STATUS_PART_TWO
+		entity.yieldStatus = YIELD_STATUS_PART_TWO
 		entity.howToCall = helpers.getHowToCall(params.howToCall)
 		entity.callData = params.calldata
 		entity.replacementPattern = params.replacementPattern
