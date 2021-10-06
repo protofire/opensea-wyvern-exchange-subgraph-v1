@@ -80,17 +80,6 @@ export function handleOrderApprovedPartOne(event: OrderApprovedPartOne): void {
   block.save()
   order.block = blockId
 
-  // is this useful?
-  // let orderApprovedPartOneEvent = events.getOrCreateOrderApprovedPartOne(event.transactionLogIndex.toHex())
-  // orderApprovedPartOneEvent.timestamp = timestamp
-  // orderApprovedPartOneEvent.block = blockId
-  // orderApprovedPartOneEvent.transaction = transaction.id
-  // orderApprovedPartOneEvent.minute = minute.id
-  // orderApprovedPartOneEvent.hour = hour.id
-  // orderApprovedPartOneEvent.day = day.id
-  // orderApprovedPartOneEvent.week = week.id
-  // orderApprovedPartOneEvent.save()
-
   let maker = accounts.getOrCreateAccount(event.params.maker, txId)
   maker.lastUpdatedAt = txId
   maker.save()
