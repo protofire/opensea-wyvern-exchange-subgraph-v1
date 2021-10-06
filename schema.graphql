@@ -33,6 +33,8 @@ type Asset @entity {
   "all the orders where this asset was traded"
   orders: [Order!]! @derivedFrom(field: "target")
 
+  # owners:
+
 }
 interface Erc20Toekn {
   "internal id used for indexation"
@@ -85,35 +87,6 @@ interface Event {
 
   "event timestamp"
 	timestamp: BigInt!
-}
-
-type OrderApprovedPartOne implements Event @entity {
-  "Internal ID used for indexation"
-	id: ID!
-
-  "event timestamp"
-	timestamp: BigInt!
-
-  "related block"
-  block: Block
-
-  "related transaction"
-  transaction: Transaction
-
-  "related order"
-  order: Order
-
-  "related minute entity"
-  minute: Minute
-  
-  "related hour entity"
-  hour: Hour
-
-  "related day entity"
-  day: Day
-
-  "related week entity"
-  week: Week
 }
 
 type Block implements Metadata @entity {
@@ -256,7 +229,6 @@ enum OrderStatus {
   NONE
   PART_ONE
   PART_TWO
-  PART_THREE
 }
 
 enum FeeMethod { 
