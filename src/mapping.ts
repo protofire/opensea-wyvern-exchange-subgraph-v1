@@ -1,3 +1,4 @@
+import { log } from "@graphprotocol/graph-ts"
 import {
   OrderApprovedPartOne,
   OrderApprovedPartTwo,
@@ -6,9 +7,11 @@ import {
   OwnershipRenounced,
   OwnershipTransferred
 } from "../generated/openseaWyvernExchange/openseaWyvernExchange"
+import { Order } from "../generated/schema"
 
 import {
   accounts,
+  assetOwners,
   assets,
   balances,
   blocks,
@@ -131,7 +134,61 @@ export function handleOrderCancelled(event: OrderCancelled): void {
 }
 
 export function handleOrdersMatched(event: OrdersMatched): void {
+  let timestamp = event.block.timestamp
+  // TODO handle minute and so on
+  let minuteEpoch = shared.date.truncateMinutes(timestamp)
+  let minute = timeSeries.minutes.getOrCreateMinute(minuteEpoch)
+  minute.save()
+
+  let hourEpoch = shared.date.truncateHours(timestamp)
+  let hour = timeSeries.hours.getOrCreateHour(hourEpoch)
+  hour.save()
+
+  let dayEpoch = shared.date.truncateDays(timestamp)
+  let day = timeSeries.days.getOrCreateDay(dayEpoch)
+  day.save()
+
+  let weekEpoch = shared.date.truncateWeeks(timestamp)
+  let week = timeSeries.weeks.getOrCreateWeek(weekEpoch)
+  week.save()
+
+  let blockId = event.block.number.toString()
+  let txHash = event.transaction.hash
+  let txId = txHash.toHex()
+
+  // TODO relate transactions to time series
+  let transaction = transactions.getOrCreateTransactionMeta(
+    txId,
+    blockId,
+    txHash,
+    event.transaction.from,
+    event.transaction.gasPrice,
+  )
+  transaction.minute = minute.id
+  transaction.hour = hour.id
+  transaction.day = day.id
+  transaction.week = week.id
+  transaction.save()
+
   shared.helpers.handleEvmMetadata(event)
+
+  let owner = accounts.getOrCreateAccount(event.params.taker, txId)
+  let sellOrderId = event.params.sellHash.toHex()
+  let order = orders.getOrCreateOrder(sellOrderId)
+  if (order.target == null) {
+    log.warning("missing target for order: {}", [sellOrderId])
+    return
+  }
+  let asset = assets.loadAsset(order.target)
+  if (asset == null) {
+    log.warning("missing asset for target: {}", [order.target])
+    return
+  }
+  let assetOwner = assetOwners.getOrCreateAssetOwner(owner.id, asset.id)
+  assetOwner.save()
+
+
+
   // TODO event entity
   // let totalTakerAmount = shared.helpers.calcTotalTakerAmount(order)
   // let takerBalance = balances.increaseBalanceAmount(order.taker, order.paymentToken, totalTakerAmount)

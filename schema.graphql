@@ -7,6 +7,9 @@ type Account @entity {
   "account's address"
   address: Bytes
 
+  "Owned assets"
+  assets: [AssetOwner!]! @derivedFrom(field:"owner")
+
   "orders that were made by this account"
   makerOrders: [Order!]! @derivedFrom(field: "maker")
   
@@ -34,8 +37,22 @@ type Asset @entity {
   orders: [Order!]! @derivedFrom(field: "target")
 
   # owners:
+  owners: [AssetOwner!]! @derivedFrom(field: "asset")
 
 }
+
+type AssetOwner @entity {
+  "internal id used for indexation"
+  id: ID! # Set to `${asset.id}-${owner.id}`
+
+  "contract's asset"
+  asset: Asset!
+
+  "Account which owns an asset"
+  owner: Account!
+
+}
+
 interface Erc20Toekn {
   "internal id used for indexation"
   id: ID!
@@ -331,7 +348,7 @@ type Order @entity {
   "Auction extra parameter - minimum bid increment for English auctions, starting/ending price difference. "
   extra: BigInt
 
-  "Listing timestamp"
+  "Listing start timestamp"
   listingTime: BigInt
 
   "Expiration timestamp - 0 for no expiry"
