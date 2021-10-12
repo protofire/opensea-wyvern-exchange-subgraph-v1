@@ -8,6 +8,7 @@ export namespace timeSeries {
 			let entity = Minute.load(id)
 			if (entity == null) {
 				entity = new Minute(id)
+				entity.epoch = epoch
 			}
 			return entity as Minute
 		}
@@ -18,6 +19,7 @@ export namespace timeSeries {
 			let entity = Hour.load(id)
 			if (entity == null) {
 				entity = new Hour(id)
+				entity.epoch = epoch
 			}
 			return entity as Hour
 		}
@@ -28,6 +30,7 @@ export namespace timeSeries {
 			let entity = Day.load(id)
 			if (entity == null) {
 				entity = new Day(id)
+				entity.epoch = epoch
 			}
 			return entity as Day
 		}
@@ -38,6 +41,7 @@ export namespace timeSeries {
 			let entity = Week.load(id)
 			if (entity == null) {
 				entity = new Week(id)
+				entity.epoch = epoch
 			}
 			return entity as Week
 		}
