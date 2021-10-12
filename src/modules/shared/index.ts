@@ -70,6 +70,12 @@ export namespace shared {
 			let takerRelayerFee = getSafeNumber(order.takerProtocolFee)
 			return basePrice.minus(takerRelayerFee).minus(takerProtocolFee)
 		}
+		export function calcTotalMakerAmount(order: Order): BigInt {
+			let basePrice = getSafeNumber(order.basePrice)
+			let makerProtocolFee = getSafeNumber(order.makerProtocolFee)
+			let makerRelayerFee = getSafeNumber(order.makerRelayerFee)
+			return basePrice.minus(makerRelayerFee).minus(makerProtocolFee)
+		}
 	}
 	export namespace date {
 		export let ONE_MINUTE = BigInt.fromI32(SECONDS_IN_MINUTE)

@@ -28,4 +28,12 @@ export namespace balances {
 		entity.amount = entity.amount.plus(amount)
 		return entity as Balance
 	}
+
+	export function decreaseBalanceAmount(
+		ownerId: string, tokenId: string, amount: BigInt
+	): Balance {
+		let entity = getOrCreateBalance(ownerId, tokenId)
+		entity.amount = entity.amount.minus(amount)
+		return entity as Balance
+	}
 }

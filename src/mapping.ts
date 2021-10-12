@@ -185,6 +185,10 @@ export function handleOrdersMatched(event: OrdersMatched): void {
   let takerBalance = balances.increaseBalanceAmount(order.taker, order.paymentToken, totalTakerAmount)
   takerBalance.save()
 
+  let totalMakerAmount = shared.helpers.calcTotalMakerAmount(order)
+  let makerBalance = balances.decreaseBalanceAmount(order.maker, order.paymentToken, totalMakerAmount)
+  makerBalance.save()
+
   let erc20tx = events.getOrCreateErc20Transaction(
     timestamp,
     order.paymentToken,
