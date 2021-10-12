@@ -273,7 +273,7 @@ type Minute implements TimeUnit @entity {
   blocks: [Block!] @derivedFrom(field: "minute")
 
   "transactions created at this thime candle"
-  transactions: [Transaction!] @derivedFrom(field: "minute")
+  transactions: [Transaction!]! @derivedFrom(field: "minute")
 
   "related volume entity"
   volume: Volume! @derivedFrom(field: "timeUnit")
@@ -293,7 +293,7 @@ type Hour implements TimeUnit @entity {
   blocks: [Block!] @derivedFrom(field: "hour")
 
   "transactions created at this thime candle"
-  transactions: [Transaction!] @derivedFrom(field: "hour")
+  transactions: [Transaction!]! @derivedFrom(field: "hour")
 
   "related volume entity"
   volume: Volume! @derivedFrom(field: "timeUnit")
@@ -313,7 +313,7 @@ type Day implements TimeUnit @entity {
   blocks: [Block!] @derivedFrom(field: "day")
 
   "transactions created at this thime candle"
-  transactions: [Transaction!] @derivedFrom(field: "day")
+  transactions: [Transaction!]! @derivedFrom(field: "day")
 
   "related volume entity"
   volume: Volume! @derivedFrom(field: "timeUnit")
@@ -332,7 +332,7 @@ type Week implements TimeUnit @entity {
   blocks: [Block!] @derivedFrom(field: "week")
 
   "transactions created at this thime candle"
-  transactions: [Transaction!] @derivedFrom(field: "week")
+  transactions: [Transaction!]! @derivedFrom(field: "week")
 
   "related volume entity"
   volume: Volume! @derivedFrom(field: "timeUnit")
@@ -527,7 +527,7 @@ interface Volume {
   timeUnit: TimeUnit!
 }
 
-type MinuteVolume implements volume @entity {
+type MinuteVolume implements Volume @entity {
   "internal id used for indexation"
   id: ID! # Set to `${asset.id}-${token-id}-${epoch}`
 
@@ -553,7 +553,7 @@ type MinuteVolume implements volume @entity {
   timeUnit: TimeUnit!
 }
 
-type HourVolume implements volume @entity {
+type HourVolume implements Volume @entity {
   "internal id used for indexation"
   id: ID! # Set to `${asset.id}-${token-id}-${epoch}`
 
@@ -579,7 +579,7 @@ type HourVolume implements volume @entity {
   timeUnit: TimeUnit!
 }
 
-type DayVolume implements volume @entity {
+type DayVolume implements Volume @entity {
   "internal id used for indexation"
   id: ID! # Set to `${asset.id}-${token-id}-${epoch}`
 
@@ -605,7 +605,7 @@ type DayVolume implements volume @entity {
   timeUnit: TimeUnit!
 }
 
-type WeekVolume implements volume @entity {
+type WeekVolume implements Volume @entity {
   "internal id used for indexation"
   id: ID! # Set to `${asset.id}-${token-id}-${epoch}`
 
