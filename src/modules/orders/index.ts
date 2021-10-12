@@ -22,14 +22,26 @@ export namespace orders {
 	export let SALE_KIND_FIXEDPRICE = "FixedPrice"
 	export let SALE_KIND_DUTCHAUCTION = "DutchAuction"
 
+	export let ORDER_CALL = "Call"
+	export let ORDER_DELEGATE = "DelegateCall"
+
 	export namespace constants {
 		export function getOrderSides(): TypedMap<string, string> {
 			let BUY = "0"
 			let SELL = "1"
-			let GENERATION_NAMES = new TypedMap<string, string>()
-			GENERATION_NAMES.set(BUY, SIDE_BUY)
-			GENERATION_NAMES.set(SELL, SIDE_SELL)
-			return GENERATION_NAMES
+			let NAMES = new TypedMap<string, string>()
+			NAMES.set(BUY, SIDE_BUY)
+			NAMES.set(SELL, SIDE_SELL)
+			return NAMES
+		}
+
+		export function getOrderCalls(): TypedMap<string, string> {
+			let CALL = "0"
+			let DELEGATE = "1"
+			let NAMES = new TypedMap<string, string>()
+			NAMES.set(CALL, ORDER_CALL)
+			NAMES.set(DELEGATE, ORDER_DELEGATE)
+			return NAMES
 		}
 	}
 	export namespace helpers {
@@ -41,20 +53,23 @@ export namespace orders {
 
 
 
-		export function getOrderSide(side: i32): string {
-			let sideAsString = shared.helpers.i32ToString(side)
-			log.info("getOrderSide said: {}", [sideAsString])
-			return shared.helpers.getPropById(sideAsString, constants.getOrderSides())
-		}
 		export function getSaleKind(kind: i32): string {
 			log.info("getSaleKind said: {}", [shared.helpers.i32ToString(kind)])
 
 			return SALE_KIND_FIXEDPRICE
 		}
-		export function getHowToCall(call: i32): string {
-			log.info("getHowToCall said: {}", [shared.helpers.i32ToString(call)])
 
-			return "DelegateCall"
+		export function getHowToCall(call: i32): string {
+			let callAsString = shared.helpers.i32ToString(call)
+			log.info("getHowToCall said: {}", [callAsString])
+			return shared.helpers.getPropById(callAsString, constants.getOrderSides())
+		}
+
+
+		export function getOrderSide(side: i32): string {
+			let sideAsString = shared.helpers.i32ToString(side)
+			log.info("getOrderSide said: {}", [sideAsString])
+			return shared.helpers.getPropById(sideAsString, constants.getOrderSides())
 		}
 	}
 
