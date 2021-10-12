@@ -53,7 +53,14 @@ type AssetOwner @entity {
 
 }
 
-interface Erc20Toekn {
+interface event {
+  "internal id used for indexation"
+  id: ID!
+}
+
+type Erc20Transaction
+
+interface Erc20Token {
   "internal id used for indexation"
   id: ID!
 
@@ -61,7 +68,7 @@ interface Erc20Toekn {
   address: Bytes
 }
 
-type Token implements Erc20Toekn @entity {
+type Token implements Erc20Token @entity {
   "internal id used for indexation"
   id: ID!
 
