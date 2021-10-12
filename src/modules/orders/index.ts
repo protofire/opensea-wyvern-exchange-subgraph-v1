@@ -1,4 +1,4 @@
-import { log } from "@graphprotocol/graph-ts";
+import { log, TypedMap } from "@graphprotocol/graph-ts";
 import { OrderApprovedPartOne__Params, OrderApprovedPartTwo__Params } from "../../../generated/openseaWyvernExchange/openseaWyvernExchange";
 import { Order } from "../../../generated/schema";
 import { shared } from "..";
@@ -22,17 +22,29 @@ export namespace orders {
 	export let SALE_KIND_FIXEDPRICE = "FixedPrice"
 	export let SALE_KIND_DUTCHAUCTION = "DutchAuction"
 
-
+	export namespace constants {
+		export function getOrderSides(): TypedMap<string, string> {
+			let BUY = "0"
+			let SELL = "1"
+			let GENERATION_NAMES = new TypedMap<string, string>()
+			GENERATION_NAMES.set(BUY, SIDE_BUY)
+			GENERATION_NAMES.set(SELL, SIDE_SELL)
+			return GENERATION_NAMES
+		}
+	}
 	export namespace helpers {
 
 		export function getFeeMethod(feeMethod: i32): string {
 			log.info("getFeeMethod said: {}", [shared.helpers.i32ToString(feeMethod)])
 			return FEE_METHOD_PROTOCOL_FEE
 		}
-		export function getOrderSide(side: i32): string {
-			log.info("getOrderSide said: {}", [shared.helpers.i32ToString(side)])
 
-			return SIDE_BUY
+
+
+		export function getOrderSide(side: i32): string {
+			let sideAsString = shared.helpers.i32ToString(side)
+			log.info("getOrderSide said: {}", [sideAsString])
+			return shared.helpers.getPropById(sideAsString, constants.getOrderSides())
 		}
 		export function getSaleKind(kind: i32): string {
 			log.info("getSaleKind said: {}", [shared.helpers.i32ToString(kind)])

@@ -1,4 +1,4 @@
-import { BigInt } from '@graphprotocol/graph-ts'
+import { BigInt, log, TypedMap } from '@graphprotocol/graph-ts'
 import { ethereum } from "@graphprotocol/graph-ts";
 import { integer } from '@protofire/subgraph-toolkit';
 import { Order } from '../../../generated/schema';
@@ -10,6 +10,24 @@ export let SECONDS_IN_DAY = SECONDS_IN_HOUR * 24
 export let SECONDS_IN_WEEK = SECONDS_IN_DAY * 7
 export namespace shared {
 	export namespace helpers {
+
+		export function getPropById(key: string, map: TypedMap<string, string>): string {
+			let val = map.get(key) as string | null
+			log.info('@@@ getPropById ::: {} : {} ', [
+				"Finding prop for key", key
+			])
+			if (val == null) {
+				log.info('@@@ getPropById ::: {} : {} ', [
+					"Cannot find prop for key", key
+				])
+				log.warning('@@@ getPropById ::: {} : {} ', [
+					"Cannot find prop for key", key
+				])
+				return ""
+			}
+			return val
+		}
+
 		export function handleEvmMetadata(event: ethereum.Event): void {
 			let blockId = event.block.number.toString()
 			let txHash = event.transaction.hash
@@ -30,6 +48,12 @@ export namespace shared {
 			let val = BigInt.fromI32(int32).toString()
 			// log.info("@@@@@@  i32 to hex: " + hex, [])
 			return val
+		}
+
+		export function i32Tohex(int32: i32): string {
+			let hex = BigInt.fromI32(int32).toHex()
+			// log.info("@@@@@@  i32 to hex: " + hex, [])
+			return hex
 		}
 
 		export function getSafeNumber(val: BigInt | null): BigInt {
