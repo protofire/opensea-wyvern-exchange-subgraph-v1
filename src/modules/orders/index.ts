@@ -16,22 +16,32 @@ export namespace orders {
 	export let FEE_METHOD_PROTOCOL_FEE = "ProtocolFee"
 	export let FEE_METHOD_SPLIT_FEE = "SplitFee"
 
-	export let SIDE_BUY = "Buy"
-	export let SIDE_SELL = "Sell"
-
 	export let SALE_KIND_FIXEDPRICE = "FixedPrice"
 	export let SALE_KIND_DUTCHAUCTION = "DutchAuction"
 
 	export let ORDER_CALL = "Call"
 	export let ORDER_DELEGATE = "DelegateCall"
 
+	export let SIDE_BUY = "Buy"
+	export let SIDE_SELL = "Sell"
+
 	export namespace constants {
-		export function getOrderSides(): TypedMap<string, string> {
-			let BUY = "0"
-			let SELL = "1"
+
+		export function getFeeTypes(): TypedMap<string, string> {
+			let PROTOCOL = "0"
+			let SPLIT = "1"
 			let NAMES = new TypedMap<string, string>()
-			NAMES.set(BUY, SIDE_BUY)
-			NAMES.set(SELL, SIDE_SELL)
+			NAMES.set(PROTOCOL, FEE_METHOD_PROTOCOL_FEE)
+			NAMES.set(SPLIT, FEE_METHOD_SPLIT_FEE)
+			return NAMES
+		}
+
+		export function getSaleKinds(): TypedMap<string, string> {
+			let FIXED = "0"
+			let AUCTION = "1"
+			let NAMES = new TypedMap<string, string>()
+			NAMES.set(FIXED, SALE_KIND_FIXEDPRICE)
+			NAMES.set(AUCTION, SALE_KIND_DUTCHAUCTION)
 			return NAMES
 		}
 
@@ -43,20 +53,30 @@ export namespace orders {
 			NAMES.set(DELEGATE, ORDER_DELEGATE)
 			return NAMES
 		}
+
+		export function getOrderSides(): TypedMap<string, string> {
+			let BUY = "0"
+			let SELL = "1"
+			let NAMES = new TypedMap<string, string>()
+			NAMES.set(BUY, SIDE_BUY)
+			NAMES.set(SELL, SIDE_SELL)
+			return NAMES
+		}
 	}
 	export namespace helpers {
 
 		export function getFeeMethod(feeMethod: i32): string {
-			log.info("getFeeMethod said: {}", [shared.helpers.i32ToString(feeMethod)])
-			return FEE_METHOD_PROTOCOL_FEE
+			let key = shared.helpers.i32ToString(feeMethod)
+			log.info("getFeeMethod said: {}", [key])
+			return shared.helpers.getPropById(key, constants.getFeeTypes())
 		}
 
 
 
 		export function getSaleKind(kind: i32): string {
-			log.info("getSaleKind said: {}", [shared.helpers.i32ToString(kind)])
-
-			return SALE_KIND_FIXEDPRICE
+			let key = shared.helpers.i32ToString(kind)
+			log.info("getSaleKind said: {}", [key])
+			return shared.helpers.getPropById(key, constants.getSaleKinds())
 		}
 
 		export function getHowToCall(call: i32): string {
@@ -64,7 +84,6 @@ export namespace orders {
 			log.info("getHowToCall said: {}", [callAsString])
 			return shared.helpers.getPropById(callAsString, constants.getOrderSides())
 		}
-
 
 		export function getOrderSide(side: i32): string {
 			let sideAsString = shared.helpers.i32ToString(side)
