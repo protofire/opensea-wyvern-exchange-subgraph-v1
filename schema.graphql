@@ -19,6 +19,12 @@ type Account @entity {
   "balances in this account scop"
   balances: [Balance!]! @derivedFrom(field: "account")
 
+  "erc20 deposits"
+  incomingErc20Transaction: [Erc20Transaction!]! @derivedFrom(field: "to")
+
+  "erc20 transfers"
+  outgoingErc20Transaction: [Erc20Transaction!]! @derivedFrom(field: "from")
+
   "evm metada transaction where this account was created"
   createdAt: Transaction!
 
