@@ -196,6 +196,9 @@ export function handleOrdersMatched(event: OrdersMatched): void {
   let minuteVolume = volumes.minute.increaseMinuteVolume(asset.id, order.paymentToken, minute.id, minuteEpoch, totalTakerAmount)
   minuteVolume.save()
 
+  let hourVolume = volumes.hour.increaseMinuteVolume(asset.id, order.paymentToken, hour.id, hourEpoch, totalTakerAmount)
+  hourVolume.save()
+
   let erc20tx = events.getOrCreateErc20Transaction(
     timestamp,
     order.paymentToken,
@@ -211,9 +214,11 @@ export function handleOrdersMatched(event: OrdersMatched): void {
   erc20tx.transaction = txId
   erc20tx.block = blockId
   erc20tx.minuteVolume = minuteVolume.id
+  erc20tx.hourVolume = hourVolume.id
   erc20tx.save()
 
   order.minuteVolume = minuteVolume.id
+  order.hourVolume = hourVolume.id
   order.save()
 
 }
