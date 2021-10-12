@@ -53,13 +53,6 @@ type AssetOwner @entity {
 
 }
 
-interface event {
-  "internal id used for indexation"
-  id: ID!
-}
-
-type Erc20Transaction
-
 interface Erc20Token {
   "internal id used for indexation"
   id: ID!
@@ -77,6 +70,8 @@ type Token implements Erc20Token @entity {
 
   "all the orders where this token was used to pay"
   orders: [Order!]! @derivedFrom(field: "paymentToken")
+
+  erc20Transactions: [Erc20Transaction!]! @derivedFrom(field: "token")
 
 }
 
@@ -175,6 +170,49 @@ type Transaction implements Metadata @entity {
 
   "related week entity"
   week: Week
+}
+
+type Erc20Transaction implements Event @entity{
+  "Internal ID used for indexation"
+	id: ID!
+
+  "event timestamp"
+	timestamp: BigInt!
+
+  "Account sending the value"
+  from: Account!
+
+  "Account receiving the value"
+  to: Account!
+
+  "related token"
+  token: Token!
+
+  "amount of the transaction"
+  amount: BigInt!
+
+  "related closed order"
+  order: Order
+
+   # time series relationships
+
+  "related minute entity"
+  minute: Minute
+  
+  "related hour entity"
+  hour: Hour
+
+  "related day entity"
+  day: Day
+
+  "related week entity"
+  week: Week
+
+  "related block"
+  block: Block
+
+  "related transaction"
+  transaction: Transaction
 }
 
 ##
@@ -389,4 +427,7 @@ type Order @entity {
 
   "related transaction"
   transaction: Transaction
+
+  "related transaction if closed"
+  erc20Transaction: Erc20Transaction @derivedFrom(field: "order")
 }

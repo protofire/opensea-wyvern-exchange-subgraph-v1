@@ -10,6 +10,7 @@ export namespace accounts {
 			entity = new Account(id)
 			entity.address = address
 			entity.createdAt = txId
+			entity.lastUpdatedAt = txId
 		}
 		return entity as Account
 	}

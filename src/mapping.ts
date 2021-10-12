@@ -161,7 +161,11 @@ export function handleOrdersMatched(event: OrdersMatched): void {
 
   shared.helpers.handleEvmMetadata(event)
 
+  let maker = accounts.getOrCreateAccount(event.params.maker, txId)
+  maker.save()
+
   let owner = accounts.getOrCreateAccount(event.params.taker, txId)
+  owner.save()
   let sellOrderId = event.params.sellHash.toHex()
   let order = orders.getOrCreateOrder(sellOrderId)
   if (order.target == null) {
@@ -177,11 +181,26 @@ export function handleOrdersMatched(event: OrdersMatched): void {
   assetOwner.save()
 
 
+  let totalTakerAmount = shared.helpers.calcTotalTakerAmount(order)
+  let takerBalance = balances.increaseBalanceAmount(order.taker, order.paymentToken, totalTakerAmount)
+  takerBalance.save()
 
-  // TODO event entity
-  // let totalTakerAmount = shared.helpers.calcTotalTakerAmount(order)
-  // let takerBalance = balances.increaseBalanceAmount(order.taker, order.paymentToken, totalTakerAmount)
-  // takerBalance.save()
+  let erc20tx = events.getOrCreateErc20Transaction(
+    timestamp,
+    order.paymentToken,
+    maker.id,
+    owner.id,
+    totalTakerAmount
+  )
+  erc20tx.order = order.id
+  erc20tx.minute = minute.id
+  erc20tx.hour = hour.id
+  erc20tx.day = day.id
+  erc20tx.week = week.id
+  erc20tx.transaction = txId
+  erc20tx.block = blockId
+  erc20tx.save()
+
 
 }
 
