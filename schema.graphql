@@ -7,6 +7,9 @@ type Account @entity {
   "account's address"
   address: Bytes
 
+  "Owned assets"
+  assets: [AssetOwner!]! @derivedFrom(field:"owner")
+
   "orders that were made by this account"
   makerOrders: [Order!]! @derivedFrom(field: "maker")
   
@@ -15,6 +18,12 @@ type Account @entity {
 
   "balances in this account scop"
   balances: [Balance!]! @derivedFrom(field: "account")
+
+  "erc20 deposits"
+  incomingErc20Transaction: [Erc20Transaction!]! @derivedFrom(field: "to")
+
+  "erc20 transfers"
+  outgoingErc20Transaction: [Erc20Transaction!]! @derivedFrom(field: "from")
 
   "evm metada transaction where this account was created"
   createdAt: Transaction!
@@ -33,8 +42,24 @@ type Asset @entity {
   "all the orders where this asset was traded"
   orders: [Order!]! @derivedFrom(field: "target")
 
+  # owners:
+  owners: [AssetOwner!]! @derivedFrom(field: "asset")
+
 }
-interface Erc20Toekn {
+
+type AssetOwner @entity {
+  "internal id used for indexation"
+  id: ID! # Set to `${asset.id}-${owner.id}`
+
+  "contract's asset"
+  asset: Asset!
+
+  "Account which owns an asset"
+  owner: Account!
+
+}
+
+interface Erc20Token {
   "internal id used for indexation"
   id: ID!
 
@@ -42,7 +67,7 @@ interface Erc20Toekn {
   address: Bytes
 }
 
-type Token implements Erc20Toekn @entity {
+type Token implements Erc20Token @entity {
   "internal id used for indexation"
   id: ID!
 
@@ -51,6 +76,8 @@ type Token implements Erc20Toekn @entity {
 
   "all the orders where this token was used to pay"
   orders: [Order!]! @derivedFrom(field: "paymentToken")
+
+  erc20Transactions: [Erc20Transaction!]! @derivedFrom(field: "token")
 
 }
 
@@ -85,35 +112,6 @@ interface Event {
 
   "event timestamp"
 	timestamp: BigInt!
-}
-
-type OrderApprovedPartOne implements Event @entity {
-  "Internal ID used for indexation"
-	id: ID!
-
-  "event timestamp"
-	timestamp: BigInt!
-
-  "related block"
-  block: Block
-
-  "related transaction"
-  transaction: Transaction
-
-  "related order"
-  order: Order
-
-  "related minute entity"
-  minute: Minute
-  
-  "related hour entity"
-  hour: Hour
-
-  "related day entity"
-  day: Day
-
-  "related week entity"
-  week: Week
 }
 
 type Block implements Metadata @entity {
@@ -178,6 +176,49 @@ type Transaction implements Metadata @entity {
 
   "related week entity"
   week: Week
+}
+
+type Erc20Transaction implements Event @entity{
+  "Internal ID used for indexation"
+	id: ID!
+
+  "event timestamp"
+	timestamp: BigInt!
+
+  "Account sending the value"
+  from: Account!
+
+  "Account receiving the value"
+  to: Account!
+
+  "related token"
+  token: Token!
+
+  "amount of the transaction"
+  amount: BigInt!
+
+  "related closed order"
+  order: Order
+
+   # time series relationships
+
+  "related minute entity"
+  minute: Minute
+  
+  "related hour entity"
+  hour: Hour
+
+  "related day entity"
+  day: Day
+
+  "related week entity"
+  week: Week
+
+  "related block"
+  block: Block
+
+  "related transaction"
+  transaction: Transaction
 }
 
 ##
@@ -252,11 +293,16 @@ type Week implements TimeUnit @entity {
   transactions: [Transaction!] @derivedFrom(field: "week")
 }
 
-enum OrderStatus {
+enum ContractOrderYieldStatus {
   NONE
   PART_ONE
   PART_TWO
-  PART_THREE
+}
+
+enum OrderStatus {
+  NONE
+  OPEN
+  FILLED
 }
 
 enum FeeMethod { 
@@ -285,7 +331,9 @@ type Order @entity {
   "internal id used for indexation"
   id: ID!
 
-  "current data yield status"
+  "current data yield status as thrown by contract"
+  yieldStatus: ContractOrderYieldStatus!
+
   status: OrderStatus!
 
   "hased order content"
@@ -351,7 +399,7 @@ type Order @entity {
   "Auction extra parameter - minimum bid increment for English auctions, starting/ending price difference. "
   extra: BigInt
 
-  "Listing timestamp"
+  "Listing start timestamp"
   listingTime: BigInt
 
   "Expiration timestamp - 0 for no expiry"
@@ -385,4 +433,7 @@ type Order @entity {
 
   "related transaction"
   transaction: Transaction
+
+  "related transaction if closed"
+  erc20Transaction: Erc20Transaction @derivedFrom(field: "order")
 }

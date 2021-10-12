@@ -1,3 +1,4 @@
+import { log } from "@graphprotocol/graph-ts"
 import {
   OrderApprovedPartOne,
   OrderApprovedPartTwo,
@@ -6,9 +7,11 @@ import {
   OwnershipRenounced,
   OwnershipTransferred
 } from "../generated/openseaWyvernExchange/openseaWyvernExchange"
+import { Order } from "../generated/schema"
 
 import {
   accounts,
+  assetOwners,
   assets,
   balances,
   blocks,
@@ -77,16 +80,6 @@ export function handleOrderApprovedPartOne(event: OrderApprovedPartOne): void {
   block.save()
   order.block = blockId
 
-  let orderApprovedPartOneEvent = events.getOrCreateOrderApprovedPartOne(event.transactionLogIndex.toHex())
-  orderApprovedPartOneEvent.timestamp = timestamp
-  orderApprovedPartOneEvent.block = blockId
-  orderApprovedPartOneEvent.transaction = transaction.id
-  orderApprovedPartOneEvent.minute = minute.id
-  orderApprovedPartOneEvent.hour = hour.id
-  orderApprovedPartOneEvent.day = day.id
-  orderApprovedPartOneEvent.week = week.id
-  orderApprovedPartOneEvent.save()
-
   let maker = accounts.getOrCreateAccount(event.params.maker, txId)
   maker.lastUpdatedAt = txId
   maker.save()
@@ -120,10 +113,6 @@ export function handleOrderApprovedPartTwo(event: OrderApprovedPartTwo): void {
   let order = orders.getOrCreateOrder(event.params.hash.toHex())
   order = orders.handleOrderPartTwo(event.params, order, token.id)
   order.save()
-
-  let totalTakerAmount = shared.helpers.calcTotalTakerAmount(order)
-  let takerBalance = balances.increaseBalanceAmount(order.taker, order.paymentToken, totalTakerAmount)
-  takerBalance.save()
 }
 
 export function handleOrderCancelled(event: OrderCancelled): void {
@@ -134,8 +123,88 @@ export function handleOrderCancelled(event: OrderCancelled): void {
 }
 
 export function handleOrdersMatched(event: OrdersMatched): void {
+  let timestamp = event.block.timestamp
+  // TODO handle minute and so on
+  let minuteEpoch = shared.date.truncateMinutes(timestamp)
+  let minute = timeSeries.minutes.getOrCreateMinute(minuteEpoch)
+  minute.save()
+
+  let hourEpoch = shared.date.truncateHours(timestamp)
+  let hour = timeSeries.hours.getOrCreateHour(hourEpoch)
+  hour.save()
+
+  let dayEpoch = shared.date.truncateDays(timestamp)
+  let day = timeSeries.days.getOrCreateDay(dayEpoch)
+  day.save()
+
+  let weekEpoch = shared.date.truncateWeeks(timestamp)
+  let week = timeSeries.weeks.getOrCreateWeek(weekEpoch)
+  week.save()
+
+  let blockId = event.block.number.toString()
+  let txHash = event.transaction.hash
+  let txId = txHash.toHex()
+
+  // TODO relate transactions to time series
+  let transaction = transactions.getOrCreateTransactionMeta(
+    txId,
+    blockId,
+    txHash,
+    event.transaction.from,
+    event.transaction.gasPrice,
+  )
+  transaction.minute = minute.id
+  transaction.hour = hour.id
+  transaction.day = day.id
+  transaction.week = week.id
+  transaction.save()
+
   shared.helpers.handleEvmMetadata(event)
-  // TODO event entity
+
+  let maker = accounts.getOrCreateAccount(event.params.maker, txId)
+  maker.save()
+
+  let owner = accounts.getOrCreateAccount(event.params.taker, txId)
+  owner.save()
+  let sellOrderId = event.params.sellHash.toHex()
+  let order = orders.getOrCreateOrder(sellOrderId)
+  if (order.target == null) {
+    log.warning("missing target for order: {}", [sellOrderId])
+    return
+  }
+  let asset = assets.loadAsset(order.target)
+  if (asset == null) {
+    log.warning("missing asset for target: {}", [order.target])
+    return
+  }
+  let assetOwner = assetOwners.getOrCreateAssetOwner(owner.id, asset.id)
+  assetOwner.save()
+
+
+  let totalTakerAmount = shared.helpers.calcTotalTakerAmount(order)
+  let takerBalance = balances.increaseBalanceAmount(order.taker, order.paymentToken, totalTakerAmount)
+  takerBalance.save()
+
+  let totalMakerAmount = shared.helpers.calcTotalMakerAmount(order)
+  let makerBalance = balances.decreaseBalanceAmount(order.maker, order.paymentToken, totalMakerAmount)
+  makerBalance.save()
+
+  let erc20tx = events.getOrCreateErc20Transaction(
+    timestamp,
+    order.paymentToken,
+    maker.id,
+    owner.id,
+    totalTakerAmount
+  )
+  erc20tx.order = order.id
+  erc20tx.minute = minute.id
+  erc20tx.hour = hour.id
+  erc20tx.day = day.id
+  erc20tx.week = week.id
+  erc20tx.transaction = txId
+  erc20tx.block = blockId
+  erc20tx.save()
+
 
 }
 
