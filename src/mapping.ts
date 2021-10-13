@@ -7,7 +7,6 @@ import {
   OwnershipRenounced,
   OwnershipTransferred
 } from "../generated/openseaWyvernExchange/openseaWyvernExchange"
-import { Order } from "../generated/schema"
 
 import {
   accounts,
@@ -20,7 +19,8 @@ import {
   shared,
   timeSeries,
   tokens,
-  transactions
+  transactions,
+  volumes
 } from "./modules"
 
 export function handleOrderApprovedPartOne(event: OrderApprovedPartOne): void {
@@ -124,7 +124,7 @@ export function handleOrderCancelled(event: OrderCancelled): void {
 
 export function handleOrdersMatched(event: OrdersMatched): void {
   let timestamp = event.block.timestamp
-  // TODO handle minute and so on
+  // TODO: refactor in mapping helpers
   let minuteEpoch = shared.date.truncateMinutes(timestamp)
   let minute = timeSeries.minutes.getOrCreateMinute(minuteEpoch)
   minute.save()
@@ -166,10 +166,12 @@ export function handleOrdersMatched(event: OrdersMatched): void {
 
   let owner = accounts.getOrCreateAccount(event.params.taker, txId)
   owner.save()
+
   let sellOrderId = event.params.sellHash.toHex()
   let order = orders.getOrCreateOrder(sellOrderId)
   if (order.target == null) {
     log.warning("missing target for order: {}", [sellOrderId])
+    // TODO: err entity
     return
   }
   let asset = assets.loadAsset(order.target)
@@ -177,6 +179,7 @@ export function handleOrdersMatched(event: OrdersMatched): void {
     log.warning("missing asset for target: {}", [order.target])
     return
   }
+
   let assetOwner = assetOwners.getOrCreateAssetOwner(owner.id, asset.id)
   assetOwner.save()
 
@@ -188,6 +191,18 @@ export function handleOrdersMatched(event: OrdersMatched): void {
   let totalMakerAmount = shared.helpers.calcTotalMakerAmount(order)
   let makerBalance = balances.decreaseBalanceAmount(order.maker, order.paymentToken, totalMakerAmount)
   makerBalance.save()
+
+  let minuteVolume = volumes.minute.increaseVolume(asset.id, order.paymentToken, minute.id, minuteEpoch, totalTakerAmount)
+  minuteVolume.save()
+
+  let hourVolume = volumes.hour.increaseVolume(asset.id, order.paymentToken, hour.id, hourEpoch, totalTakerAmount)
+  hourVolume.save()
+
+  let dayVolume = volumes.day.increaseVolume(asset.id, order.paymentToken, day.id, dayEpoch, totalTakerAmount)
+  dayVolume.save()
+
+  let weekVolume = volumes.week.increaseVolume(asset.id, order.paymentToken, week.id, weekEpoch, totalTakerAmount)
+  weekVolume.save()
 
   let erc20tx = events.getOrCreateErc20Transaction(
     timestamp,
@@ -203,8 +218,17 @@ export function handleOrdersMatched(event: OrdersMatched): void {
   erc20tx.week = week.id
   erc20tx.transaction = txId
   erc20tx.block = blockId
+  erc20tx.minuteVolume = minuteVolume.id
+  erc20tx.hourVolume = hourVolume.id
+  erc20tx.dayVolume = dayVolume.id
+  erc20tx.weekVolume = weekVolume.id
   erc20tx.save()
 
+  order.minuteVolume = minuteVolume.id
+  order.hourVolume = hourVolume.id
+  order.dayVolume = dayVolume.id
+  order.weekVolume = weekVolume.id
+  order.save()
 
 }
 

@@ -82,7 +82,7 @@ export namespace orders {
 		export function getHowToCall(call: i32): string {
 			let callAsString = shared.helpers.i32ToString(call)
 			log.info("getHowToCall said: {}", [callAsString])
-			return shared.helpers.getPropById(callAsString, constants.getOrderSides())
+			return shared.helpers.getPropById(callAsString, constants.getOrderCalls())
 		}
 
 		export function getOrderSide(side: i32): string {
