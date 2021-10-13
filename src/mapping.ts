@@ -193,11 +193,14 @@ export function handleOrdersMatched(event: OrdersMatched): void {
   let makerBalance = balances.decreaseBalanceAmount(order.maker, order.paymentToken, totalMakerAmount)
   makerBalance.save()
 
-  let minuteVolume = volumes.minute.increaseMinuteVolume(asset.id, order.paymentToken, minute.id, minuteEpoch, totalTakerAmount)
+  let minuteVolume = volumes.minute.increaseVolume(asset.id, order.paymentToken, minute.id, minuteEpoch, totalTakerAmount)
   minuteVolume.save()
 
-  let hourVolume = volumes.hour.increaseMinuteVolume(asset.id, order.paymentToken, hour.id, hourEpoch, totalTakerAmount)
+  let hourVolume = volumes.hour.increaseVolume(asset.id, order.paymentToken, hour.id, hourEpoch, totalTakerAmount)
   hourVolume.save()
+
+  let dayVolume = volumes.day.increaseVolume(asset.id, order.paymentToken, day.id, dayEpoch, totalTakerAmount)
+  dayVolume.save()
 
   let erc20tx = events.getOrCreateErc20Transaction(
     timestamp,
@@ -215,10 +218,12 @@ export function handleOrdersMatched(event: OrdersMatched): void {
   erc20tx.block = blockId
   erc20tx.minuteVolume = minuteVolume.id
   erc20tx.hourVolume = hourVolume.id
+  erc20tx.dayVolume = dayVolume.id
   erc20tx.save()
 
   order.minuteVolume = minuteVolume.id
   order.hourVolume = hourVolume.id
+  order.dayVolume = dayVolume.id
   order.save()
 
 }

@@ -1,6 +1,6 @@
 import { BigInt } from "@graphprotocol/graph-ts"
 import { integer } from "@protofire/subgraph-toolkit"
-import { MinuteVolume, HourVolume } from "../../../generated/schema"
+import { MinuteVolume, HourVolume, DayVolume } from "../../../generated/schema"
 
 export namespace volumes {
 	export namespace minute {
@@ -20,7 +20,7 @@ export namespace volumes {
 			return entity as MinuteVolume
 		}
 
-		export function increaseMinuteVolume(
+		export function increaseVolume(
 			assetId: string, tokenId: string, timeUnitId: string,
 			epoch: BigInt, tokenAmount: BigInt
 		): MinuteVolume {
@@ -47,7 +47,7 @@ export namespace volumes {
 			return entity as HourVolume
 		}
 
-		export function increaseMinuteVolume(
+		export function increaseVolume(
 			assetId: string, tokenId: string, timeUnitId: string,
 			epoch: BigInt, tokenAmount: BigInt
 		): HourVolume {
@@ -55,6 +55,33 @@ export namespace volumes {
 			entity.tokenAmount = entity.tokenAmount.plus(tokenAmount)
 			entity.ordersAmount = entity.ordersAmount.plus(integer.ONE)
 			return entity as HourVolume
+		}
+	}
+	export namespace day {
+		export function getOrCreateDayVolume(
+			assetId: string, tokenId: string, timeUnitId: string, epoch: BigInt
+		): DayVolume {
+			let id = assetId.concat("-").concat(tokenId).concat("-").concat(epoch.toString())
+			let entity = DayVolume.load(id)
+			if (entity == null) {
+				entity = new DayVolume(id)
+				entity.asset = assetId
+				entity.ordersAmount = integer.ZERO
+				entity.token = tokenId
+				entity.tokenAmount = integer.ZERO
+				entity.timeUnit = timeUnitId
+			}
+			return entity as DayVolume
+		}
+
+		export function increaseVolume(
+			assetId: string, tokenId: string, timeUnitId: string,
+			epoch: BigInt, tokenAmount: BigInt
+		): DayVolume {
+			let entity = getOrCreateDayVolume(assetId, tokenId, timeUnitId, epoch)
+			entity.tokenAmount = entity.tokenAmount.plus(tokenAmount)
+			entity.ordersAmount = entity.ordersAmount.plus(integer.ONE)
+			return entity as DayVolume
 		}
 	}
 }
