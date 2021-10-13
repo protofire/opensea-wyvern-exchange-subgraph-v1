@@ -105,7 +105,7 @@ export namespace volumes {
 			assetId: string, tokenId: string, timeUnitId: string,
 			epoch: BigInt, tokenAmount: BigInt
 		): WeekVolume {
-			let entity = getOrCreateDayVolume(assetId, tokenId, timeUnitId, epoch)
+			let entity = getOrCreateWeekVolume(assetId, tokenId, timeUnitId, epoch)
 			entity.tokenAmount = entity.tokenAmount.plus(tokenAmount)
 			entity.ordersAmount = entity.ordersAmount.plus(integer.ONE)
 			return entity as WeekVolume
