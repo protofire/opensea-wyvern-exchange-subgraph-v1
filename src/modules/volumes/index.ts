@@ -1,6 +1,6 @@
 import { BigInt } from "@graphprotocol/graph-ts"
 import { integer } from "@protofire/subgraph-toolkit"
-import { MinuteVolume, HourVolume, DayVolume } from "../../../generated/schema"
+import { MinuteVolume, HourVolume, DayVolume, WeekVolume } from "../../../generated/schema"
 
 export namespace volumes {
 	export namespace minute {
@@ -82,6 +82,33 @@ export namespace volumes {
 			entity.tokenAmount = entity.tokenAmount.plus(tokenAmount)
 			entity.ordersAmount = entity.ordersAmount.plus(integer.ONE)
 			return entity as DayVolume
+		}
+	}
+	export namespace week {
+		export function getOrCreateWeekVolume(
+			assetId: string, tokenId: string, timeUnitId: string, epoch: BigInt
+		): WeekVolume {
+			let id = assetId.concat("-").concat(tokenId).concat("-").concat(epoch.toString())
+			let entity = WeekVolume.load(id)
+			if (entity == null) {
+				entity = new WeekVolume(id)
+				entity.asset = assetId
+				entity.ordersAmount = integer.ZERO
+				entity.token = tokenId
+				entity.tokenAmount = integer.ZERO
+				entity.timeUnit = timeUnitId
+			}
+			return entity as WeekVolume
+		}
+
+		export function increaseVolume(
+			assetId: string, tokenId: string, timeUnitId: string,
+			epoch: BigInt, tokenAmount: BigInt
+		): WeekVolume {
+			let entity = getOrCreateDayVolume(assetId, tokenId, timeUnitId, epoch)
+			entity.tokenAmount = entity.tokenAmount.plus(tokenAmount)
+			entity.ordersAmount = entity.ordersAmount.plus(integer.ONE)
+			return entity as WeekVolume
 		}
 	}
 }
