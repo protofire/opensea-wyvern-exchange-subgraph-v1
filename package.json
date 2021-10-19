@@ -11,7 +11,8 @@
   },
   "dependencies": {
     "@graphprotocol/graph-ts": "^0.20.0",
-    "@protofire/subgraph-toolkit": "^0.1.2"
+    "@protofire/subgraph-toolkit": "^0.1.2",
+    "matchstick-as": "^0.1.5"
   },
   "devDependencies": {
     "@graphprotocol/graph-cli": "^0.20"
