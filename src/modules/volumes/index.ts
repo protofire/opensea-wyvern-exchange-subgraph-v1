@@ -7,7 +7,7 @@ export namespace volumes {
 		export function getOrCreateMinuteVolume(
 			assetId: string, tokenId: string, timeUnitId: string, epoch: BigInt
 		): MinuteVolume {
-			let id = assetId.concat("-").concat(tokenId).concat("-").concat(epoch.toString())
+			let id = "minute-".concat(assetId).concat("-").concat(tokenId).concat("-").concat(epoch.toString())
 			let entity = MinuteVolume.load(id)
 			if (entity == null) {
 				entity = new MinuteVolume(id)
@@ -34,7 +34,7 @@ export namespace volumes {
 		export function getOrCreateHourVolume(
 			assetId: string, tokenId: string, timeUnitId: string, epoch: BigInt
 		): HourVolume {
-			let id = assetId.concat("-").concat(tokenId).concat("-").concat(epoch.toString())
+			let id = "hour-".concat(assetId).concat("-").concat(tokenId).concat("-").concat(epoch.toString())
 			let entity = HourVolume.load(id)
 			if (entity == null) {
 				entity = new HourVolume(id)
@@ -61,7 +61,7 @@ export namespace volumes {
 		export function getOrCreateDayVolume(
 			assetId: string, tokenId: string, timeUnitId: string, epoch: BigInt
 		): DayVolume {
-			let id = assetId.concat("-").concat(tokenId).concat("-").concat(epoch.toString())
+			let id = "day-".concat(assetId).concat("-").concat(tokenId).concat("-").concat(epoch.toString())
 			let entity = DayVolume.load(id)
 			if (entity == null) {
 				entity = new DayVolume(id)
@@ -88,7 +88,7 @@ export namespace volumes {
 		export function getOrCreateWeekVolume(
 			assetId: string, tokenId: string, timeUnitId: string, epoch: BigInt
 		): WeekVolume {
-			let id = assetId.concat("-").concat(tokenId).concat("-").concat(epoch.toString())
+			let id = "week-".concat(assetId).concat("-").concat(tokenId).concat("-").concat(epoch.toString())
 			let entity = WeekVolume.load(id)
 			if (entity == null) {
 				entity = new WeekVolume(id)

@@ -503,7 +503,7 @@ type Order @entity {
 
 interface Volume {
   "internal id used for indexation"
-  id: ID! # Set to `${asset.id}-${token-id}-${epoch}`
+  id: ID! # Set to `timeUnitName-${asset.id}-${token-id}-${epoch}`
 
   "traded asset"
   asset: Asset!
@@ -529,7 +529,7 @@ interface Volume {
 
 type MinuteVolume implements Volume @entity {
   "internal id used for indexation"
-  id: ID! # Set to `${asset.id}-${token-id}-${epoch}`
+  id: ID! # Set to `minute-${asset.id}-${token-id}-${epoch}`
 
   "traded asset"
   asset: Asset!
@@ -555,7 +555,7 @@ type MinuteVolume implements Volume @entity {
 
 type HourVolume implements Volume @entity {
   "internal id used for indexation"
-  id: ID! # Set to `${asset.id}-${token-id}-${epoch}`
+  id: ID! # Set to `hour-${asset.id}-${token-id}-${epoch}`
 
   "traded asset"
   asset: Asset!
@@ -581,7 +581,7 @@ type HourVolume implements Volume @entity {
 
 type DayVolume implements Volume @entity {
   "internal id used for indexation"
-  id: ID! # Set to `${asset.id}-${token-id}-${epoch}`
+  id: ID! # Set to `day-${asset.id}-${token-id}-${epoch}`
 
   "traded asset"
   asset: Asset!
@@ -607,7 +607,7 @@ type DayVolume implements Volume @entity {
 
 type WeekVolume implements Volume @entity {
   "internal id used for indexation"
-  id: ID! # Set to `${asset.id}-${token-id}-${epoch}`
+  id: ID! # Set to `week-${asset.id}-${token-id}-${epoch}`
 
   "traded asset"
   asset: Asset!
