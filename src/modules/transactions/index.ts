@@ -4,9 +4,10 @@ import { Transaction } from "../../../generated/schema";
 
 export namespace transactions {
 	export function getOrCreateTransactionMeta(
-		id: string, blockId: string, hash: Bytes,
+		blockId: string, hash: Bytes,
 		from: Bytes, gasPrice: BigInt
 	): Transaction {
+		let txId = hash.toHex()
 		let meta = Transaction.load(id)
 		if (meta == null) {
 			meta = new Transaction(id)

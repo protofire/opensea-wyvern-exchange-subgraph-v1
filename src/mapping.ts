@@ -55,11 +55,9 @@ export function handleOrderApprovedPartOne(event: OrderApprovedPartOne): void {
 
   let blockId = event.block.number.toString()
   let txHash = event.transaction.hash
-  let txId = txHash.toHex()
 
   // TODO relate transactions to time series
   let transaction = transactions.getOrCreateTransactionMeta(
-    txId,
     blockId,
     txHash,
     event.transaction.from,
@@ -70,7 +68,7 @@ export function handleOrderApprovedPartOne(event: OrderApprovedPartOne): void {
   transaction.day = day.id
   transaction.week = week.id
   transaction.save()
-  order.transaction = txId
+  order.transaction = transaction.id
 
   let block = blocks.services.getOrCreateBlock(blockId, event.block.timestamp, event.block.number)
   block.minute = minute.id
@@ -80,13 +78,13 @@ export function handleOrderApprovedPartOne(event: OrderApprovedPartOne): void {
   block.save()
   order.block = blockId
 
-  let maker = accounts.getOrCreateAccount(event.params.maker, txId)
-  maker.lastUpdatedAt = txId
+  let maker = accounts.getOrCreateAccount(event.params.maker, transaction.id)
+  maker.lastUpdatedAt = transaction.id
   maker.save()
   order.maker = maker.id
 
-  let taker = accounts.getOrCreateAccount(event.params.taker, txId)
-  taker.lastUpdatedAt = txId
+  let taker = accounts.getOrCreateAccount(event.params.taker, transaction.id)
+  taker.lastUpdatedAt = transaction.id
   taker.save()
   order.taker = taker.id
 
@@ -143,11 +141,7 @@ export function handleOrdersMatched(event: OrdersMatched): void {
 
   let blockId = event.block.number.toString()
   let txHash = event.transaction.hash
-  let txId = txHash.toHex()
-
-  // TODO relate transactions to time series
   let transaction = transactions.getOrCreateTransactionMeta(
-    txId,
     blockId,
     txHash,
     event.transaction.from,
@@ -161,10 +155,10 @@ export function handleOrdersMatched(event: OrdersMatched): void {
 
   shared.helpers.handleEvmMetadata(event)
 
-  let maker = accounts.getOrCreateAccount(event.params.maker, txId)
+  let maker = accounts.getOrCreateAccount(event.params.maker, transaction.id)
   maker.save()
 
-  let owner = accounts.getOrCreateAccount(event.params.taker, txId)
+  let owner = accounts.getOrCreateAccount(event.params.taker, transaction.id)
   owner.save()
 
   let sellOrderId = event.params.sellHash.toHex()
@@ -216,7 +210,7 @@ export function handleOrdersMatched(event: OrdersMatched): void {
   erc20tx.hour = hour.id
   erc20tx.day = day.id
   erc20tx.week = week.id
-  erc20tx.transaction = txId
+  erc20tx.transaction = transaction.id
   erc20tx.block = blockId
   erc20tx.minuteVolume = minuteVolume.id
   erc20tx.hourVolume = hourVolume.id
