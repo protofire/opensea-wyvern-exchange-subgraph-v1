@@ -3,9 +3,7 @@ import {
   OrderApprovedPartOne,
   OrderApprovedPartTwo,
   OrderCancelled,
-  OrdersMatched,
-  OwnershipRenounced,
-  OwnershipTransferred
+  OrdersMatched
 } from "../generated/openseaWyvernExchange/openseaWyvernExchange"
 
 import {
@@ -22,6 +20,8 @@ import {
   transactions,
   volumes
 } from "./modules"
+
+// TODO: add event handlers
 
 export function handleOrderApprovedPartOne(event: OrderApprovedPartOne): void {
   let order = orders.getOrCreateOrder(event.params.hash.toHex())
