@@ -35,8 +35,4 @@ dataSources:
           handler: handleOrderCancelled
         - event: OrdersMatched(bytes32,bytes32,indexed address,indexed address,uint256,indexed bytes32)
           handler: handleOrdersMatched
-        - event: OwnershipRenounced(indexed address)
-          handler: handleOwnershipRenounced
-        - event: OwnershipTransferred(indexed address,indexed address)
-          handler: handleOwnershipTransferred
       file: ./src/mapping.ts

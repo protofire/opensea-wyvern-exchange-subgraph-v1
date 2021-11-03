@@ -225,11 +225,3 @@ export function handleOrdersMatched(event: OrdersMatched): void {
   order.save()
 
 }
-
-export function handleOwnershipRenounced(event: OwnershipRenounced): void {
-  // shared.helpers.handleEvmMetadata(event)
-}
-
-export function handleOwnershipTransferred(event: OwnershipTransferred): void {
-  // shared.helpers.handleEvmMetadata(event)
-}
