@@ -17,12 +17,23 @@ dataSources:
       apiVersion: 0.0.4
       language: wasm/assemblyscript
       entities:
-        - OrderApprovedPartOne
-        - OrderApprovedPartTwo
-        - OrderCancelled
-        - OrdersMatched
-        - OwnershipRenounced
-        - OwnershipTransferred
+        - Account
+        - Asset
+        - AssetOwner
+        - Token
+        - Balance
+        - Block
+        - Transaction
+        - Erc20Transaction
+        - Minute
+        - Hour
+        - Day
+        - Week
+        - Order
+        - MinuteVolume
+        - HourVolume
+        - DayVolume
+        - WeekVolume
       abis:
         - name: openseaWyvernExchange
           file: ./abis/openseaWyvernExchange.json
