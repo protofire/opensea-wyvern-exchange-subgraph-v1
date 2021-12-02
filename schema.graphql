@@ -79,6 +79,19 @@ type Token implements Erc20Token @entity {
 
   erc20Transactions: [Erc20Transaction!]! @derivedFrom(field: "token")
 
+
+  "related minuteVolume entity"
+  minuteVolumes: [MinuteVolume!]! @derivedFrom(field: "token")
+  
+  "related hourVolume entity"
+  hourVolumes: [HourVolume!]! @derivedFrom(field: "token")
+
+  "related dayVolume entity"
+  dayVolumes: [DayVolume!]! @derivedFrom(field: "token")
+
+  "related weekVolume entity"
+  weekVolumes: [WeekVolume!]! @derivedFrom(field: "token")
+
 }
 
 type Balance @entity {
@@ -93,6 +106,8 @@ type Balance @entity {
 
   "token's amount"
   amount: BigInt!
+
+  erc20Transactions: [Erc20Transaction!]! @derivedFrom(field: "balance")
 }
 
 ##
@@ -196,6 +211,9 @@ type Erc20Transaction implements Event @entity{
 
   "amount of the transaction"
   amount: BigInt!
+
+  "a related balance entity"
+  balance: Balance
 
   "related closed order"
   order: Order
