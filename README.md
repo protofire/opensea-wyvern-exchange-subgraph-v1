@@ -147,83 +147,63 @@ The account also contains useful information such as assets owned by the account
 
 ## Asset
 
+A given nft contract containning NFTs, provides a relationship between accounts trough the "Asset owner entity" and orders opened under this "target".
+
+##  Nft
+
+WIP: the token entity it's under construction. 
 
 
-## Token
+## Metadata entities
 
-	Generated(indexed uint256,indexed address,string)
+### Transaction
 
-The Token entity provides an standard erc-721 token interface wich also holds the uri, an string representation of the nft's art.
+Transactions excetuted in the Ethereum virtual machine. These transacctions are meant to be included in blocks. Relates to time series entities, orders and blocks. Also contains information like hash, gas price, eth.
 
-## Other entities
+### Block
 
-In order to provide additional info, the Block and TransactionMeta entities are added. The first one contains info about block number's and timestamp. The other one contains information about chain's transacion such as hash, gasUsed, etc.
+Each piece of the blockchains, contins a number and a timestamp and is related to orders, transactions and time series entities.
 
-## Example Queries
+# Example queries
 
+## Orders
 
 ```graphql
-# working with Transactions
+	# Returns a list of succesfully catched by the subgraph sorted by listingTime
 {
-   Transactions
-	   id
-	   type
-	   ...on Mint{
-		   to {
-			   address
-		   }
-	   }
-	   ...on Burn{
-		   form {
-			   address
-		   }
-	   }
-	   ...on Transfer{
-		   from{
-			   address
-		   }
-		   to{
-			   address
-		   }
-	   }
-   }
+	orders(
+		first: 15
+		where: {
+			yieldStatus: PART_TWO
+		}
+		orderDirection: desc
+		orderBy: listingTime, 
+	) {
+		id
+		callData
+		target { 
+			address
+		}
+	}
 }
 ```
-
+## Time Series
 
 ```graphql
-# working with accounts
+	# For minutes returns a list of block's numbers
+	# For days returns a list of order's Volume
 {
-   accounts{
-	   sent{
-		   token {
-			   uri
-		   }
-	   }
-	   recieved {
-		   block {
+   timeUnits{
+	   ...on Minute {
+		   block: {
 			   number
 		   }
 	   }
-	   approved {
-		   token {
-			   id
-		   }
+	   ...on Day {
+			volume: {
+		   		ordersAmount
+	   		}
 	   }
-   }	  
-}
-```
-
-
-```graphql
-# working with Tokens
-{
-   tokens{
-	   owner {
-		   address
-	   }
-	   burned
-	   uri
    }
 }
 ```
