@@ -1,0 +1,650 @@
+
+
+type Account @entity {
+  "internal id used for indexation"
+  id: ID!
+
+  "account's address"
+  address: Bytes
+
+  "Owned assets"
+  assets: [AssetOwner!]! @derivedFrom(field:"owner")
+
+  "orders that were made by this account"
+  makerOrders: [Order!]! @derivedFrom(field: "maker")
+  
+  "orders that were taken by this account"
+  takerOrders: [Order!]! @derivedFrom(field: "taker")
+
+  "balances in this account scop"
+  balances: [Balance!]! @derivedFrom(field: "account")
+
+  "erc20 deposits"
+  incomingErc20Transaction: [Erc20Transaction!]! @derivedFrom(field: "to")
+
+  "erc20 transfers"
+  outgoingErc20Transaction: [Erc20Transaction!]! @derivedFrom(field: "from")
+
+  "evm metada transaction where this account was created"
+  createdAt: Transaction!
+
+  "evm metada transaction where this account was updated"
+  lastUpdatedAt: Transaction!
+}
+
+type Asset @entity { 
+  "internal id used for indexation"
+  id: ID!
+
+  "asset contract's address"
+  address: Bytes
+
+  "all the orders where this asset was traded"
+  orders: [Order!]! @derivedFrom(field: "target")
+
+  # owners:
+  owners: [AssetOwner!]! @derivedFrom(field: "asset")
+
+}
+
+type AssetOwner @entity {
+  "internal id used for indexation"
+  id: ID! # Set to `${asset.id}-${owner.id}`
+
+  "contract's asset"
+  asset: Asset!
+
+  "Account which owns an asset"
+  owner: Account!
+
+}
+
+interface Erc20Token {
+  "internal id used for indexation"
+  id: ID!
+
+  "asset contract's address"
+  address: Bytes
+}
+
+type Token implements Erc20Token @entity {
+  "internal id used for indexation"
+  id: ID!
+
+  "asset contract's address"
+  address: Bytes
+
+  "all the orders where this token was used to pay"
+  orders: [Order!]! @derivedFrom(field: "paymentToken")
+
+  erc20Transactions: [Erc20Transaction!]! @derivedFrom(field: "token")
+
+
+  "related minuteVolume entity"
+  minuteVolumes: [MinuteVolume!]! @derivedFrom(field: "token")
+  
+  "related hourVolume entity"
+  hourVolumes: [HourVolume!]! @derivedFrom(field: "token")
+
+  "related dayVolume entity"
+  dayVolumes: [DayVolume!]! @derivedFrom(field: "token")
+
+  "related weekVolume entity"
+  weekVolumes: [WeekVolume!]! @derivedFrom(field: "token")
+
+}
+
+type Balance @entity {
+  "internal id used for indexation"
+  id: ID!
+
+  "balance's owner"
+  account: Account!
+
+  "related token"
+  token: Token!
+
+  "token's amount"
+  amount: BigInt!
+
+  erc20Transactions: [Erc20Transaction!]! @derivedFrom(field: "balance")
+}
+
+##
+
+# events and metadata entities
+
+##
+
+interface Metadata {
+	"Internal ID used for indexation"
+	id: ID!
+}
+
+interface Event {
+  "Internal ID used for indexation"
+	id: ID!
+
+  "event timestamp"
+	timestamp: BigInt!
+}
+
+type Block implements Metadata @entity {
+	"Internal ID used for indexation"
+	id: ID!
+
+	"event timestamp"
+	timestamp: BigInt!	
+	
+	"Block's number"
+  number: BigInt!
+
+	"Chain transactions info"
+	transactions: [Transaction!] @derivedFrom(field: "block")
+
+	"Orders created on this block"
+	orders: [Order!] @derivedFrom(field: "block")
+
+  "related minute entity"
+  minute: Minute
+  
+  "related hour entity"
+  hour: Hour
+
+  "related day entity"
+  day: Day
+
+  "related week entity"
+  week: Week
+
+}
+
+type Transaction implements Metadata @entity {
+	"Internal ID used for indexation"
+	id: ID!
+
+	"Transaction's Block"
+	block: Block!
+
+	"Transaction's hash"
+	hash: Bytes
+
+	"Sender Address"
+	from: Bytes
+
+	"Transaction's gas price"
+  gasPrice: BigInt
+
+  "Order created on this Transaction"
+	order: Order
+
+  # time series relationships
+
+  "related minute entity"
+  minute: Minute
+  
+  "related hour entity"
+  hour: Hour
+
+  "related day entity"
+  day: Day
+
+  "related week entity"
+  week: Week
+}
+
+type Erc20Transaction implements Event @entity{
+  "Internal ID used for indexation"
+	id: ID!
+
+  "event timestamp"
+	timestamp: BigInt!
+
+  "Account sending the value"
+  from: Account!
+
+  "Account receiving the value"
+  to: Account!
+
+  "related token"
+  token: Token!
+
+  "amount of the transaction"
+  amount: BigInt!
+
+  "a related balance entity"
+  balance: Balance
+
+  "related closed order"
+  order: Order
+
+   # time series relationships
+
+  "related minute entity"
+  minute: Minute
+  
+  "related hour entity"
+  hour: Hour
+
+  "related day entity"
+  day: Day
+
+  "related week entity"
+  week: Week
+
+  "related minuteVolume entity"
+  minuteVolume: MinuteVolume
+  
+  "related hourVolume entity"
+  hourVolume: HourVolume
+
+  "related dayVolume entity"
+  dayVolume: DayVolume
+
+  "related weekVolume entity"
+  weekVolume: WeekVolume
+
+  "related block"
+  block: Block
+
+  "related transaction"
+  transaction: Transaction
+}
+
+##
+
+# Time series
+
+##
+
+interface TimeUnit {
+  "internal id used for indexation"
+  id: ID!
+
+  "timestamp division of the starting point"
+  epoch: BigInt!
+
+  "orders filled at this time candle"
+  orders: [Order!]!
+
+  "blocks signed at this thime candle"
+  blocks: [Block!]
+
+  "transactions created at this thime candle"
+  transactions: [Transaction!]!
+
+  "related volume entity"
+  volume: Volume!
+}
+
+type Minute implements TimeUnit @entity {
+  "internal id used for indexation"
+  id: ID!
+
+  "timestamp division of the starting point"
+  epoch: BigInt!
+
+  "orders filled at this time candle"
+  orders: [Order!]! @derivedFrom(field: "minute")
+
+  "blocks signed at this thime candle"
+  blocks: [Block!] @derivedFrom(field: "minute")
+
+  "transactions created at this thime candle"
+  transactions: [Transaction!]! @derivedFrom(field: "minute")
+
+  "related volume entity"
+  volume: Volume! @derivedFrom(field: "timeUnit")
+}
+
+type Hour implements TimeUnit @entity {
+  "internal id used for indexation"
+  id: ID!
+
+  "timestamp division of the starting point"
+  epoch: BigInt!
+
+  "orders filled at this time candle"
+  orders: [Order!]! @derivedFrom(field: "hour")
+  
+  "blocks signed at this thime candle"
+  blocks: [Block!] @derivedFrom(field: "hour")
+
+  "transactions created at this thime candle"
+  transactions: [Transaction!]! @derivedFrom(field: "hour")
+
+  "related volume entity"
+  volume: Volume! @derivedFrom(field: "timeUnit")
+}
+
+type Day implements TimeUnit @entity {
+  "internal id used for indexation"
+  id: ID!
+
+  "timestamp division of the starting point"
+  epoch: BigInt!
+
+  "orders filled at this time candle"
+  orders: [Order!]! @derivedFrom(field: "day")
+  
+  "blocks signed at this thime candle"
+  blocks: [Block!] @derivedFrom(field: "day")
+
+  "transactions created at this thime candle"
+  transactions: [Transaction!]! @derivedFrom(field: "day")
+
+  "related volume entity"
+  volume: Volume! @derivedFrom(field: "timeUnit")
+}
+type Week implements TimeUnit @entity {
+  "internal id used for indexation"
+  id: ID!
+
+  "timestamp division of the starting point"
+  epoch: BigInt!
+
+  "orders filled at this time candle"
+  orders: [Order!]! @derivedFrom(field: "week")
+
+  "blocks signed at this thime candle"
+  blocks: [Block!] @derivedFrom(field: "week")
+
+  "transactions created at this thime candle"
+  transactions: [Transaction!]! @derivedFrom(field: "week")
+
+  "related volume entity"
+  volume: Volume! @derivedFrom(field: "timeUnit")
+}
+
+enum ContractOrderYieldStatus {
+  NONE
+  PART_ONE
+  PART_TWO
+}
+
+enum OrderStatus {
+  NONE
+  OPEN
+  FILLED
+}
+
+enum FeeMethod { 
+  ProtocolFee
+  SplitFee
+}
+
+enum Side { 
+  Buy
+  Sell
+}
+
+enum SaleKind {
+  FixedPrice
+  DutchAuction
+}
+
+enum HowToCall {
+  Call
+  DelegateCall
+}
+
+
+
+type Order @entity {
+  "internal id used for indexation"
+  id: ID!
+
+  "current data yield status as thrown by contract"
+  yieldStatus: ContractOrderYieldStatus!
+
+  status: OrderStatus!
+
+  "hased order content"
+  hash: Bytes
+
+  "Current contract exchange (fixed to 0x7be8076f4ea4a4ad08075c2508e481d6c946d12b, opensea wyvern address)"
+  exchange: Bytes
+
+  "Account who made this order"
+  maker: Account
+
+  "Account who took this order"
+  taker: Account
+
+  "maker paid fee for relayer"
+  makerRelayerFee: BigInt
+
+  "maker paid fee for protocol"
+  makerProtocolFee: BigInt
+
+  "taker paid fee for relayer"
+  takerRelayerFee: BigInt
+
+  "taker paid fee for protocol"
+  takerProtocolFee: BigInt
+
+  "Order fee recipient or zero address for taker order."
+  feeRecipient: Account
+
+  "Fee method (protocolfee or split fee)"
+  feeMethod: FeeMethod
+
+  "side: Is it buy or sell"
+  side: Side
+
+  "salkind: is it FixedPrice or DutchAuction"
+  saleKind: SaleKind
+
+  "NFT contract address"
+  target: Asset
+
+  "Which kind of call enum"
+  howToCall: HowToCall
+
+  "additionl order call data"
+  callData: Bytes
+
+  "Calldata replacement pattern, or an empty byte array for no replacement."
+  replacementPattern: Bytes
+  
+  "Static call target, zero-address for no static call."
+  staticTarget: Bytes
+
+  "Static call extra data"
+  staticExtradata: Bytes
+
+  "Token used to pay for the order, or the zero-address as a sentinel value for Ether."
+  paymentToken: Token
+
+  "Base price of the order (in paymentTokens). "
+  basePrice: BigInt
+
+  "Auction extra parameter - minimum bid increment for English auctions, starting/ending price difference. "
+  extra: BigInt
+
+  "Listing start timestamp"
+  listingTime: BigInt
+
+  "Expiration timestamp - 0 for no expiry"
+  expirationTIme: BigInt
+
+  "Order salt, used to prevent duplicate hashes."
+  salt: BigInt
+
+  "Should be included in order book"
+  orderbookInclusionDesired: Boolean
+
+  "was this order canceled"
+  cancelled: Boolean
+
+  # time series relationships
+
+  "related minute entity"
+  minute: Minute
+  
+  "related hour entity"
+  hour: Hour
+
+  "related day entity"
+  day: Day
+
+  "related week entity"
+  week: Week
+
+  "related block"
+  block: Block
+
+  "related transaction"
+  transaction: Transaction
+
+  "related transaction if closed"
+  erc20Transaction: Erc20Transaction @derivedFrom(field: "order")
+
+  "related minuteVolume entity"
+  minuteVolume: MinuteVolume
+  
+  "related hourVolume entity"
+  hourVolume: HourVolume
+
+  "related dayVolume entity"
+  dayVolume: DayVolume
+
+  "related weekVolume entity"
+  weekVolume: WeekVolume
+}
+
+##
+
+# Volumes
+
+##
+
+interface Volume {
+  "internal id used for indexation"
+  id: ID! # Set to `timeUnitName-${asset.id}-${token-id}-${epoch}`
+
+  "traded asset"
+  asset: Asset!
+
+  "amount of traded orders for this asset in a given time frame"
+  ordersAmount: BigInt!
+
+  "derived list of orders traded for this asset in a given time frame"
+  orders: [Order!]!
+
+  "erc20 token used to pay for this asset"
+  token: Token!
+
+  "derived list of Erc20Transactions for this token in a given time frame"
+  erc20Transactions: [Erc20Transaction!]!
+
+  "amount of tokens traded for this assets in a given time frame"
+  tokenAmount: BigInt!
+
+  "related time serie entitiy, ej dailyVolume for x day is related to x dayCandle"
+  timeUnit: TimeUnit!
+}
+
+type MinuteVolume implements Volume @entity {
+  "internal id used for indexation"
+  id: ID! # Set to `minute-${asset.id}-${token-id}-${epoch}`
+
+  "traded asset"
+  asset: Asset!
+
+  "amount of traded orders for this asset in a given time frame"
+  ordersAmount: BigInt!
+
+  "derived list of orders traded for this asset in a given time frame"
+  orders: [Order!]! @derivedFrom(field: "minuteVolume")
+
+  "erc20 token used to pay for this asset"
+  token: Token!
+
+  "derived list of Erc20Transactions for this token in a given time frame"
+  erc20Transactions: [Erc20Transaction!]! @derivedFrom(field: "minuteVolume")
+
+  "amount of tokens traded for this assets in a given time frame"
+  tokenAmount: BigInt!
+
+  "related time serie entitiy, ej dailyVolume for x day is related to x dayCandle"
+  timeUnit: TimeUnit!
+}
+
+type HourVolume implements Volume @entity {
+  "internal id used for indexation"
+  id: ID! # Set to `hour-${asset.id}-${token-id}-${epoch}`
+
+  "traded asset"
+  asset: Asset!
+
+  "amount of traded orders for this asset in a given time frame"
+  ordersAmount: BigInt!
+
+  "derived list of orders traded for this asset in a given time frame"
+  orders: [Order!]! @derivedFrom(field: "hourVolume")
+
+  "erc20 token used to pay for this asset"
+  token: Token!
+
+  "derived list of Erc20Transactions for this token in a given time frame"
+  erc20Transactions: [Erc20Transaction!]! @derivedFrom(field: "hourVolume")
+
+  "amount of tokens traded for this assets in a given time frame"
+  tokenAmount: BigInt!
+
+  "related time serie entitiy, ej dailyVolume for x day is related to x dayCandle"
+  timeUnit: TimeUnit!
+}
+
+type DayVolume implements Volume @entity {
+  "internal id used for indexation"
+  id: ID! # Set to `day-${asset.id}-${token-id}-${epoch}`
+
+  "traded asset"
+  asset: Asset!
+
+  "amount of traded orders for this asset in a given time frame"
+  ordersAmount: BigInt!
+
+  "derived list of orders traded for this asset in a given time frame"
+  orders: [Order!]! @derivedFrom(field: "dayVolume")
+
+  "erc20 token used to pay for this asset"
+  token: Token!
+
+  "derived list of Erc20Transactions for this token in a given time frame"
+  erc20Transactions: [Erc20Transaction!]! @derivedFrom(field: "dayVolume")
+
+  "amount of tokens traded for this assets in a given time frame"
+  tokenAmount: BigInt!
+
+  "related time serie entitiy, ej dailyVolume for x day is related to x dayCandle"
+  timeUnit: TimeUnit!
+}
+
+type WeekVolume implements Volume @entity {
+  "internal id used for indexation"
+  id: ID! # Set to `week-${asset.id}-${token-id}-${epoch}`
+
+  "traded asset"
+  asset: Asset!
+
+  "amount of traded orders for this asset in a given time frame"
+  ordersAmount: BigInt!
+
+  "derived list of orders traded for this asset in a given time frame"
+  orders: [Order!]! @derivedFrom(field: "weekVolume")
+
+  "erc20 token used to pay for this asset"
+  token: Token!
+
+  "derived list of Erc20Transactions for this token in a given time frame"
+  erc20Transactions: [Erc20Transaction!]! @derivedFrom(field: "weekVolume")
+
+  "amount of tokens traded for this assets in a given time frame"
+  tokenAmount: BigInt!
+
+  "related time serie entitiy, ej dailyVolume for x day is related to x dayCandle"
+  timeUnit: TimeUnit!
+}

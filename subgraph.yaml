@@ -1,0 +1,49 @@
+specVersion: 0.0.2
+repository: https://github.com/protofire/opensea-wyvern-exchange-subgraph
+description: This subgraph aims to be index the opensea exchange contract, including time series entities, erc transactions and ntf contracts address
+
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: openseaWyvernExchange
+    network: mainnet
+    source:
+      address: "0x7be8076f4ea4a4ad08075c2508e481d6c946d12b"
+      abi: openseaWyvernExchange
+      startBlock: 5774644
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - Account
+        - Asset
+        - AssetOwner
+        - Token
+        - Balance
+        - Block
+        - Transaction
+        - Erc20Transaction
+        - Minute
+        - Hour
+        - Day
+        - Week
+        - Order
+        - MinuteVolume
+        - HourVolume
+        - DayVolume
+        - WeekVolume
+      abis:
+        - name: openseaWyvernExchange
+          file: ./abis/openseaWyvernExchange.json
+      eventHandlers:
+        - event: OrderApprovedPartOne(indexed bytes32,address,indexed address,address,uint256,uint256,uint256,uint256,indexed address,uint8,uint8,uint8,address)
+          handler: handleOrderApprovedPartOne
+        - event: OrderApprovedPartTwo(indexed bytes32,uint8,bytes,bytes,address,bytes,address,uint256,uint256,uint256,uint256,uint256,bool)
+          handler: handleOrderApprovedPartTwo
+        - event: OrderCancelled(indexed bytes32)
+          handler: handleOrderCancelled
+        - event: OrdersMatched(bytes32,bytes32,indexed address,indexed address,uint256,indexed bytes32)
+          handler: handleOrdersMatched
+      file: ./src/mapping.ts

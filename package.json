@@ -1,0 +1,20 @@
+{
+  "name": "opensea-wyvern-exchange-subgraph",
+  "license": "MIT",
+  "scripts": {
+    "codegen": "npx graph codegen",
+    "build": "npx graph build",
+    "deploy": "npx graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ protofire/opensea-wyvern-exchange-subgraph",
+    "create-local": "graph create --node http://localhost:8020/ protofire/opensea-wyvern-exchange-subgraph",
+    "remove-local": "graph remove --node http://localhost:8020/ protofire/opensea-wyvern-exchange-subgraph",
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 protofire/opensea-wyvern-exchange-subgraph"
+  },
+  "dependencies": {
+    "@graphprotocol/graph-ts": "^0.20.0",
+    "@protofire/subgraph-toolkit": "^0.1.2",
+    "matchstick-as": "^0.1.5"
+  },
+  "devDependencies": {
+    "@graphprotocol/graph-cli": "^0.20"
+  }
+}
