@@ -207,3 +207,26 @@ Each piece of the blockchains, contins a number and a timestamp and is related t
    }
 }
 ```
+
+## Volume
+
+```graphql
+	# Minute volume for ether
+{
+   timeUnits{
+	   #token
+	   ...on MinuteVolume (
+		   where: {
+			   token: {
+				   address: "0x000..."
+			   }
+		   }
+	   ) {
+		   tokenAmount
+	   	}
+	   }
+   }
+}
+```
+
+## Token
