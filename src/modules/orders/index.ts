@@ -1,4 +1,4 @@
-import { log, TypedMap } from "@graphprotocol/graph-ts";
+import { Address, BigInt, Bytes, log, TypedMap } from "@graphprotocol/graph-ts";
 import { OrderApprovedPartOne__Params, OrderApprovedPartTwo__Params } from "../../../generated/openseaWyvernExchange/openseaWyvernExchange";
 import { Order } from "../../../generated/schema";
 import { shared } from "..";
@@ -71,8 +71,6 @@ export namespace orders {
 			return shared.helpers.getPropById(key, constants.getFeeTypes())
 		}
 
-
-
 		export function getSaleKind(kind: i32): string {
 			let key = shared.helpers.i32ToString(kind)
 			log.info("getSaleKind said: {}", [key])
@@ -92,6 +90,14 @@ export namespace orders {
 		}
 	}
 
+	export function safeLoadOrder(id: string): Order {
+		let entity = Order.load(id)
+		if (!entity) {
+			log.critical("safeLoadOrder :: Missing order for id", [id])
+		}
+		return entity!
+	}
+
 	export function getOrCreateOrder(id: string): Order {
 		let entity = Order.load(id)
 		if (entity == null) {
@@ -102,52 +108,106 @@ export namespace orders {
 		}
 		return entity as Order
 	}
-
-	export function handleOrderPartOne(
-		params: OrderApprovedPartOne__Params,
-		order: Order,
-		assetId: string
+	/*
+	 struct Order {
+			// Exchange address, intended as a versioning mechanism.
+			address exchange;
+			// Order maker address.
+			address maker;
+			// Order taker address, if specified.
+			address taker;
+			// Maker relayer fee of the order, unused for taker order.
+			uint makerRelayerFee;
+			// Taker relayer fee of the order, or maximum taker fee for a taker order.
+			uint takerRelayerFee;
+			// Maker protocol fee of the order, unused for taker order.
+			uint makerProtocolFee;
+			// Taker protocol fee of the order, or maximum taker fee for a taker order.
+			uint takerProtocolFee;
+			// Order fee recipient or zero address for taker order.
+			address feeRecipient;
+			// Fee method (protocol token or split fee).
+			FeeMethod feeMethod;
+			// Side (buy/sell).
+			SaleKindInterface.Side side;
+			// Kind of sale.
+			SaleKindInterface.SaleKind saleKind;
+			// Target.
+			address target;
+			// HowToCall.
+			AuthenticatedProxy.HowToCall howToCall;
+			// Calldata.
+			bytes calldata;
+			// Calldata replacement pattern, or an empty byte array for no replacement.
+			bytes replacementPattern;
+			// Static call target, zero-address for no static call.
+			address staticTarget;
+			// Static call extra data.
+			bytes staticExtradata;
+			// Token used to pay for the order, or the zero-address as a sentinel value for Ether.
+			address paymentToken;
+			// Base price of the order (in paymentTokens).
+			uint basePrice;
+			// Auction extra parameter - minimum bid increment for English auctions, starting/ending price difference.
+			uint extra;
+			// Listing timestamp.
+			uint listingTime;
+			// Expiration timestamp - 0 for no expiry.
+			uint expirationTime;
+			// Order salt, used to prevent duplicate hashes.
+			uint salt;
+	*/
+	export function handleOrder(
+		exchange: Address,
+		maker: string,
+		taker: string,
+		makerRelayerFee: BigInt,
+		takerRelayerFee: BigInt,
+		makerProtocolFee: BigInt,
+		takerProtocolFee: BigInt,
+		feeRecipient: Address,
+		feeMethod: i32,
+		side: i32,
+		saleKind: i32,
+		target: string,
+		howToCall: i32,
+		callData: Bytes,
+		replacementPattern: Bytes,
+		staticTarget: Address,
+		staticExtradata: Bytes,
+		paymentToken: string,
+		basePrice: BigInt,
+		extra: BigInt,
+		listingTime: BigInt,
+		expirationTIme: BigInt,
+		salt: BigInt,
 	): Order {
-		let entity = order
-		entity.yieldStatus = YIELD_STATUS_PART_ONE
-		entity.status = ORDER_STATUS_OPEN
-		entity.hash = params.hash
-		entity.exchange = params.exchange
-		entity.makerRelayerFee = params.makerRelayerFee
-		entity.makerProtocolFee = params.makerProtocolFee
-		entity.takerRelayerFee = params.takerRelayerFee
-		entity.takerProtocolFee = params.takerProtocolFee
-		entity.feeRecipient = params.feeRecipient.toHex()
-		// TODO TEST HELPERS
-		entity.feeMethod = helpers.getFeeMethod(params.feeMethod)
-		entity.side = helpers.getOrderSide(params.side)
-		entity.saleKind = helpers.getSaleKind(params.saleKind)
-		// 
-		entity.target = assetId
-
-		return entity as Order
-	}
-
-	export function handleOrderPartTwo(
-		params: OrderApprovedPartTwo__Params,
-		order: Order,
-		tokenId: string
-	): Order {
-		let entity = order
-		entity.yieldStatus = YIELD_STATUS_PART_TWO
-		entity.howToCall = helpers.getHowToCall(params.howToCall)
-		entity.callData = params.calldata
-		entity.replacementPattern = params.replacementPattern
-		entity.staticTarget = params.staticTarget
-		entity.staticExtradata = params.staticExtradata
-		entity.paymentToken = tokenId
-		entity.basePrice = params.basePrice
-		entity.extra = params.extra
-		entity.listingTime = params.listingTime
-		entity.expirationTIme = params.expirationTime
-		entity.salt = params.salt
-
-
+		let orderSide = helpers.getOrderSide(side)
+		let id = salt.toHexString()
+		let entity = getOrCreateOrder(id)
+		entity.exchange = exchange
+		entity.maker = maker
+		entity.taker = taker
+		entity.makerRelayerFee = makerRelayerFee
+		entity.takerRelayerFee = takerRelayerFee
+		entity.makerProtocolFee = makerProtocolFee
+		entity.takerProtocolFee = takerProtocolFee
+		entity.feeRecipient = feeRecipient.toHex() // todo use accounts helper
+		entity.feeMethod = helpers.getFeeMethod(feeMethod)
+		entity.side = orderSide
+		entity.saleKind = helpers.getSaleKind(saleKind)
+		entity.target = target
+		entity.howToCall = helpers.getHowToCall(howToCall)
+		entity.callData = callData
+		entity.replacementPattern = replacementPattern
+		entity.staticTarget = staticTarget
+		entity.staticExtradata = staticExtradata
+		entity.paymentToken = paymentToken // todo use token value
+		entity.basePrice = basePrice
+		entity.extra = extra
+		entity.listingTime = listingTime
+		entity.expirationTIme = expirationTIme
+		entity.salt = salt
 		return entity as Order
 	}
 
@@ -155,5 +215,13 @@ export namespace orders {
 		let entity = getOrCreateOrder(id)
 		entity.cancelled = true
 		return entity as Order
+	}
+
+	export namespace mutations {
+		export function setAsFilled(order: Order): Order {
+			let _order = order
+			_order.status = ORDER_STATUS_FILLED
+			return _order
+		}
 	}
 }

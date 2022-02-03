@@ -336,6 +336,7 @@ type Day implements TimeUnit @entity {
   "related volume entity"
   volume: Volume! @derivedFrom(field: "timeUnit")
 }
+
 type Week implements TimeUnit @entity {
   "internal id used for indexation"
   id: ID!

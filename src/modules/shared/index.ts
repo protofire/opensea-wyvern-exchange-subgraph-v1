@@ -16,16 +16,15 @@ export namespace shared {
 			log.info('@@@ getPropById ::: {} : {} ', [
 				"Finding prop for key", key
 			])
-			if (val == null) {
+			if (!val) {
 				log.info('@@@ getPropById ::: {} : {} ', [
 					"Cannot find prop for key", key
 				])
 				log.warning('@@@ getPropById ::: {} : {} ', [
 					"Cannot find prop for key", key
 				])
-				return ""
 			}
-			return val
+			return val ? val : ""
 		}
 
 		export function handleEvmMetadata(event: ethereum.Event): void {
@@ -36,7 +35,6 @@ export namespace shared {
 			block.save()
 
 			let transaction = transactions.getOrCreateTransactionMeta(
-				txHash.toHexString(),
 				blockId,
 				txHash,
 				event.transaction.from,
@@ -57,25 +55,24 @@ export namespace shared {
 		}
 
 		export function getSafeNumber(val: BigInt | null): BigInt {
-			let number = val
-			if (number == null) {
-				number = integer.ZERO
+			if (!val) {
+				log.warning("getSafeNumber :: input was null", [])
 			}
-			return number as BigInt
+			return val ? val : integer.ZERO
+
 		}
 
-		export function calcTotalTakerAmount(order: Order): BigInt {
-			let basePrice = getSafeNumber(order.basePrice)
-			let takerProtocolFee = getSafeNumber(order.takerProtocolFee)
-			let takerRelayerFee = getSafeNumber(order.takerProtocolFee)
+		export function calcOrderAmount(
+			_basePrice: BigInt,
+			_protocolFee: BigInt,
+			_relayerFee: BigInt,
+		): BigInt {
+			let basePrice = getSafeNumber(_basePrice)
+			let takerProtocolFee = getSafeNumber(_protocolFee)
+			let takerRelayerFee = getSafeNumber(_relayerFee)
 			return basePrice.minus(takerRelayerFee).minus(takerProtocolFee)
 		}
-		export function calcTotalMakerAmount(order: Order): BigInt {
-			let basePrice = getSafeNumber(order.basePrice)
-			let makerProtocolFee = getSafeNumber(order.makerProtocolFee)
-			let makerRelayerFee = getSafeNumber(order.makerRelayerFee)
-			return basePrice.minus(makerRelayerFee).minus(makerProtocolFee)
-		}
+
 	}
 	export namespace date {
 		export let ONE_MINUTE = BigInt.fromI32(SECONDS_IN_MINUTE)
