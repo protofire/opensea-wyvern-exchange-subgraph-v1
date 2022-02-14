@@ -1,9 +1,26 @@
 import { BigInt, Bytes } from "@graphprotocol/graph-ts";
+import { bytes } from "@protofire/subgraph-toolkit";
+import { log } from "matchstick-as";
 
 export namespace orders {
 	export namespace helpers {
+
+
+		export function decodeBatch(callData: string): string[] {
+			const TRAILING_0x = 2
+			const METHOD_ID_LENGTH = 8
+			const UINT_256_LENGTH = 64
+
+			let indexStartNbToken = TRAILING_0x + METHOD_ID_LENGTH + UINT_256_LENGTH * 4;
+			let indexStopNbToken = indexStartNbToken + UINT_256_LENGTH;
+			let nbTokenStr = callData.substring(indexStartNbToken, indexStopNbToken);
+
+			log.warning("nbTokenStr ={}", [nbTokenStr])
+			return [nbTokenStr]
+		}
+
 		export function decodeData(transferFromData: string): string[] {
-			let TRAILING_0x = 2;
+			const TRAILING_0x = 2;
 			const METHOD_ID_LENGTH = 8;
 			const UINT_256_LENGTH = 64;
 
@@ -42,7 +59,7 @@ export namespace orders {
 		}
 
 		export function hexToBigInt(str: string): BigInt {
-			return BigInt.fromString(str)
+			return bytes.toSignedInt(hexToBytes(str))
 		}
 
 		export function strToBigInt(str: string): BigInt {
