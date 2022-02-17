@@ -1,6 +1,6 @@
-import { BigInt, log, TypedMap } from '@graphprotocol/graph-ts'
+import { BigInt, Bytes, log, TypedMap } from '@graphprotocol/graph-ts'
 import { ethereum } from "@graphprotocol/graph-ts";
-import { integer } from '@protofire/subgraph-toolkit';
+import { bytes, integer } from '@protofire/subgraph-toolkit';
 import { Order } from '../../../generated/schema';
 import { blocks, transactions } from "../index";
 
@@ -10,6 +10,14 @@ export let SECONDS_IN_DAY = SECONDS_IN_HOUR * 24
 export let SECONDS_IN_WEEK = SECONDS_IN_DAY * 7
 export namespace shared {
 	export namespace helpers {
+
+		export function hexToBytes(str: string): Bytes {
+			return Bytes.fromByteArray(Bytes.fromHexString(str))
+		}
+
+		export function hexToBigInt(str: string): BigInt {
+			return bytes.toSignedInt(hexToBytes(str))
+		}
 
 		export function getPropById(key: string, map: TypedMap<string, string>): string {
 			let val = map.get(key) as string | null
