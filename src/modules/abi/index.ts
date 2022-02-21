@@ -33,11 +33,25 @@ export namespace abi {
 			this.from = _from
 			this.to = _to
 			this.token = _token
+		}
 
+		public toStringArray(): string[] {
+			return [this.method, this.from, this.to, this.token]
+		}
+
+		/*
+		* toString method to be used for debbuging only
+		*/
+		public toString(): string {
+			return this.toLogFormattedString()
+		}
+
+		public toLogFormattedString(): string {
+			return "\n · · · · · · method( " + this.method + " )\n · · · · · · from( " + this.from + " ) \n · · · · · · to( " + this.to + " )\n · · · · · · id( " + this.token + " ) "
 		}
 	}
 
-	export function decodedBatchNftData(
+	export function decodeBatchNftData(
 		buyCallData: Bytes, sellCallData: Bytes, replacementPattern: Bytes
 	): Decoded_atomicize_Result {
 		/**
@@ -76,10 +90,9 @@ export namespace abi {
 		let indexStartNbToken = TRAILING_0x + METHOD_ID_LENGTH + UINT_256_LENGTH * 4;
 		let indexStopNbToken = indexStartNbToken + UINT_256_LENGTH;
 		let nbTokenStr = callData.substring(indexStartNbToken, indexStopNbToken);
+
 		let nbToken = shared.helpers.hexToBigInt(nbTokenStr).toI32()
 		let addressList = new Array<string>();
-
-		let methodId = callData.substring(TRAILING_0x, TRAILING_0x + METHOD_ID_LENGTH);
 
 		// Get the associated NFT contracts
 		let offset = indexStopNbToken;
@@ -109,6 +122,7 @@ export namespace abi {
 			offset += TRANSFER_CALL_DATA_LENGTH;
 		}
 
+		let methodId = callData.substring(TRAILING_0x, TRAILING_0x + METHOD_ID_LENGTH);
 
 		return new Decoded_atomicize_Result(
 			methodId,
@@ -141,7 +155,7 @@ export namespace abi {
 
 	}
 
-	function decodeAbi_transferFrom_Method(callData: string, trailing0x = true): Decoded_TransferFrom_Result {
+	export function decodeAbi_transferFrom_Method(callData: string, trailing0x: boolean = true): Decoded_TransferFrom_Result {
 		let TRAILING_0x = trailing0x ? 2 : 0;
 		const METHOD_ID_LENGTH = 8;
 		const UINT_256_LENGTH = 64;
@@ -162,7 +176,13 @@ export namespace abi {
 		)
 	}
 
-	function guardedArrayReplace(array: Bytes, replacement: Bytes, mask: Bytes): string {
+	export function guardedArrayReplace(_array: Bytes, _replacement: Bytes, _mask: Bytes): string {
+
+		// copies Bytes Array to avoid buffer overwrite
+		let array = Bytes.fromUint8Array(_array.slice(0))
+		let replacement = Bytes.fromUint8Array(_replacement.slice(0))
+		let mask = Bytes.fromUint8Array(_mask.slice(0))
+
 		array.reverse();
 		replacement.reverse();
 		mask.reverse();
