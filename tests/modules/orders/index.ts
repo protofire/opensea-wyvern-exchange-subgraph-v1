@@ -6,20 +6,26 @@ export namespace orders {
 	export namespace helpers {
 
 
-		export function decodeBatch(callData: string): string[] {
+		export function decodeBatchData(mergedCallData: string): string[] {
 			const TRAILING_0x = 2
 			const METHOD_ID_LENGTH = 8
 			const UINT_256_LENGTH = 64
 
+			let methodIdEnd = TRAILING_0x + METHOD_ID_LENGTH
+
 			let indexStartNbToken = TRAILING_0x + METHOD_ID_LENGTH + UINT_256_LENGTH * 4;
 			let indexStopNbToken = indexStartNbToken + UINT_256_LENGTH;
-			let nbTokenStr = callData.substring(indexStartNbToken, indexStopNbToken);
+			let nbTokenStr = mergedCallData.substring(indexStartNbToken, indexStopNbToken);
+			let nbToken = hexToBigInt(nbTokenStr).toI32()
+
+			let method = mergedCallData.substring(TRAILING_0x, methodIdEnd);
+
 
 			log.warning("nbTokenStr ={}", [nbTokenStr])
 			return [nbTokenStr]
 		}
 
-		export function decodeData(transferFromData: string): string[] {
+		export function decodeData(mergedCallData: string): string[] {
 			const TRAILING_0x = 2;
 			const METHOD_ID_LENGTH = 8;
 			const UINT_256_LENGTH = 64;
@@ -39,10 +45,10 @@ export namespace orders {
 			let fromEnd = methodIdEnd + UINT_256_LENGTH
 			let toEnd = methodIdEnd + (UINT_256_LENGTH * 2)
 
-			let method = transferFromData.substring(TRAILING_0x, methodIdEnd);
-			let from = transferFromData.substring(methodIdEnd, fromEnd);
-			let to = transferFromData.substring(fromEnd, toEnd);
-			let tokenIdHexStr = transferFromData.substring(toEnd);
+			let method = mergedCallData.substring(TRAILING_0x, methodIdEnd);
+			let from = mergedCallData.substring(methodIdEnd, fromEnd);
+			let to = mergedCallData.substring(fromEnd, toEnd);
+			let tokenIdHexStr = mergedCallData.substring(toEnd);
 			// let tokenId = (tokenIdHexStr, 16);
 			// let tokenIdStr: string = tokenId.toString();
 
