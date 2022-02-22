@@ -1,9 +1,9 @@
-import { BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts";
+import { Address, BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts";
 import { shared } from "..";
 
 export namespace abi {
 
-	class Decoded_atomicize_Result {
+	export class Decoded_atomicize_Result {
 		method: string
 		addressList: Array<string>
 		transfers: Array<Decoded_TransferFrom_Result>
@@ -18,15 +18,15 @@ export namespace abi {
 		}
 	}
 
-	class Decoded_TransferFrom_Result {
+	export class Decoded_TransferFrom_Result {
 		method: string
-		from: string
-		to: string
+		from: Address
+		to: Address
 		token: BigInt
 		constructor(
 			_method: string,
-			_from: string,
-			_to: string,
+			_from: Address,
+			_to: Address,
 			_token: BigInt,
 		) {
 			this.method = _method
@@ -36,7 +36,7 @@ export namespace abi {
 		}
 
 		public toStringArray(): string[] {
-			return [this.method, this.from, this.to, this.token.toString()]
+			return [this.method, this.from.toHexString(), this.to.toHexString(), this.token.toString()]
 		}
 
 		/*
@@ -47,7 +47,7 @@ export namespace abi {
 		}
 
 		public toLogFormattedString(): string {
-			return "\n · · · · · · method( " + this.method + " )\n · · · · · · from( " + this.from + " ) \n · · · · · · to( " + this.to + " )\n · · · · · · id( " + this.token.toString() + " ) "
+			return "\n · · · · · · method( " + this.method + " )\n · · · · · · from( " + this.from.toHexString() + " ) \n · · · · · · to( " + this.to.toHexString() + " )\n · · · · · · id( " + this.token.toString() + " ) "
 		}
 	}
 
@@ -161,15 +161,15 @@ export namespace abi {
 			"(address,address,uint256)", dataWithoutFunctionSelector
 		)!.toTuple()
 
-		let functionSelector = Bytes.fromUint8Array(callData.subarray(0, 4)).toHexString().substring(2)
-		let senderId = decoded[0].toAddress().toHexString()
-		let recieverId = decoded[1].toAddress().toHexString()
+		let functionSelector = Bytes.fromUint8Array(callData.subarray(0, 4)).toString()
+		let senderAddress = decoded[0].toAddress()
+		let recieverAddress = decoded[1].toAddress()
 		let tokenId = decoded[2].toBigInt()
 
 		return new Decoded_TransferFrom_Result(
-			functionSelector, // to remove 0x
-			senderId,
-			recieverId,
+			functionSelector,
+			senderAddress,
+			recieverAddress,
 			tokenId
 		)
 	}
