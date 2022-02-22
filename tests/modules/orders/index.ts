@@ -1,6 +1,6 @@
-import { BigInt, Bytes } from "@graphprotocol/graph-ts";
+import { BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts";
 import { bytes } from "@protofire/subgraph-toolkit";
-import { log } from "matchstick-as";
+import { log, logStore } from "matchstick-as";
 
 export namespace orders {
 	export namespace helpers {
@@ -25,7 +25,9 @@ export namespace orders {
 			return [nbTokenStr]
 		}
 
-		export function decodeData(mergedCallData: string): string[] {
+
+
+		export function decodeData(_mergedCallData: Bytes): string[] {
 			const TRAILING_0x = 2;
 			const METHOD_ID_LENGTH = 8;
 			const UINT_256_LENGTH = 64;
@@ -41,10 +43,11 @@ export namespace orders {
 			 * +2 | 0 chars for the "0x" leading part
 			 */
 
+
 			let methodIdEnd = TRAILING_0x + METHOD_ID_LENGTH
 			let fromEnd = methodIdEnd + UINT_256_LENGTH
 			let toEnd = methodIdEnd + (UINT_256_LENGTH * 2)
-
+			let mergedCallData = _mergedCallData.toHexString()
 			let method = mergedCallData.substring(TRAILING_0x, methodIdEnd);
 			let from = mergedCallData.substring(methodIdEnd, fromEnd);
 			let to = mergedCallData.substring(fromEnd, toEnd);
@@ -72,7 +75,7 @@ export namespace orders {
 			return BigInt.fromString(str)
 		}
 
-		export function guardedArrayReplace(array: Bytes, replacement: Bytes, mask: Bytes): string {
+		export function guardedArrayReplace(array: Bytes, replacement: Bytes, mask: Bytes): Bytes {
 			array.reverse();
 			replacement.reverse();
 			mask.reverse();
@@ -84,8 +87,11 @@ export namespace orders {
 			// array |= replacement & mask;
 			bigIntReplacement = bigIntReplacement.bitAnd(bigIntMask);
 			bigIntgArray = bigIntgArray.bitOr(bigIntReplacement);
-			let callDataHexString = bigIntgArray.toHexString();
-			return callDataHexString;
+			// let callDataHexString = bigIntgArray.toHexString();
+			// return callDataHexString;
+			// let callDataHexString = bigIntgArray.toHexString();
+			return changetype<Bytes>(Bytes.fromBigInt(bigIntgArray).reverse());
+
 		}
 	}
 }

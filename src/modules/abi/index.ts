@@ -1,4 +1,4 @@
-import { BigInt, Bytes } from "@graphprotocol/graph-ts";
+import { BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts";
 import { shared } from "..";
 
 export namespace abi {
@@ -22,12 +22,12 @@ export namespace abi {
 		method: string
 		from: string
 		to: string
-		token: string
+		token: BigInt
 		constructor(
 			_method: string,
 			_from: string,
 			_to: string,
-			_token: string,
+			_token: BigInt,
 		) {
 			this.method = _method
 			this.from = _from
@@ -36,7 +36,7 @@ export namespace abi {
 		}
 
 		public toStringArray(): string[] {
-			return [this.method, this.from, this.to, this.token]
+			return [this.method, this.from, this.to, this.token.toString()]
 		}
 
 		/*
@@ -47,7 +47,7 @@ export namespace abi {
 		}
 
 		public toLogFormattedString(): string {
-			return "\n · · · · · · method( " + this.method + " )\n · · · · · · from( " + this.from + " ) \n · · · · · · to( " + this.to + " )\n · · · · · · id( " + this.token + " ) "
+			return "\n · · · · · · method( " + this.method + " )\n · · · · · · from( " + this.from + " ) \n · · · · · · to( " + this.to + " )\n · · · · · · id( " + this.token.toString() + " ) "
 		}
 	}
 
@@ -155,28 +155,26 @@ export namespace abi {
 
 	}
 
-	export function decodeAbi_transferFrom_Method(callData: string, trailing0x: boolean = true): Decoded_TransferFrom_Result {
-		let TRAILING_0x = trailing0x ? 2 : 0;
-		const METHOD_ID_LENGTH = 8;
-		const UINT_256_LENGTH = 64;
-		let senderIdStart = TRAILING_0x + METHOD_ID_LENGTH
-		let recieverIdStart = TRAILING_0x + METHOD_ID_LENGTH + UINT_256_LENGTH
-		let tokenIdStart = TRAILING_0x + METHOD_ID_LENGTH + (UINT_256_LENGTH * 2)
+	export function decodeAbi_transferFrom_Method(callData: Bytes): Decoded_TransferFrom_Result {
+		let dataWithoutFunctionSelector = Bytes.fromUint8Array(callData.subarray(4))
+		let decoded = ethereum.decode(
+			"(address,address,uint256)", dataWithoutFunctionSelector
+		)!.toTuple()
 
-		let methodId = callData.substring(TRAILING_0x, TRAILING_0x + METHOD_ID_LENGTH);
-		let senderId = callData.substring(senderIdStart, senderIdStart + UINT_256_LENGTH);
-		let recieverId = callData.substring(recieverIdStart, recieverIdStart + UINT_256_LENGTH);
-		let tokenId = callData.substring(tokenIdStart)
+		let functionSelector = Bytes.fromUint8Array(callData.subarray(0, 4)).toHexString().substring(2)
+		let senderId = decoded[0].toAddress().toHexString()
+		let recieverId = decoded[1].toAddress().toHexString()
+		let tokenId = decoded[2].toBigInt()
 
 		return new Decoded_TransferFrom_Result(
-			methodId,
+			functionSelector, // to remove 0x
 			senderId,
 			recieverId,
 			tokenId
 		)
 	}
 
-	export function guardedArrayReplace(_array: Bytes, _replacement: Bytes, _mask: Bytes): string {
+	export function guardedArrayReplace(_array: Bytes, _replacement: Bytes, _mask: Bytes): Bytes {
 
 		// copies Bytes Array to avoid buffer overwrite
 		let array = Bytes.fromUint8Array(_array.slice(0))
@@ -194,7 +192,7 @@ export namespace abi {
 		// array |= replacement & mask;
 		bigIntReplacement = bigIntReplacement.bitAnd(bigIntMask);
 		bigIntgArray = bigIntgArray.bitOr(bigIntReplacement);
-		let callDataHexString = bigIntgArray.toHexString();
-		return callDataHexString;
+		return changetype<Bytes>(Bytes.fromBigInt(bigIntgArray).reverse());
+
 	}
 }
