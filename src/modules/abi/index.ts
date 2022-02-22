@@ -161,7 +161,7 @@ export namespace abi {
 			"(address,address,uint256)", dataWithoutFunctionSelector
 		)!.toTuple()
 
-		let functionSelector = Bytes.fromUint8Array(callData.subarray(0, 4)).toString()
+		let functionSelector = Bytes.fromUint8Array(callData.subarray(0, 4)).toHex().slice(2)
 		let senderAddress = decoded[0].toAddress()
 		let recieverAddress = decoded[1].toAddress()
 		let tokenId = decoded[2].toBigInt()
