@@ -1,6 +1,6 @@
 import { log } from "matchstick-as"
 import { orders } from "./modules"
-import { abi } from "../src/modules"
+import { abi, shared } from "../src/modules"
 
 export function testCallDataReplacement_0x4fece400c0d3db0937162ab44bab34445626ecfe_1626(): void {
 	/*
@@ -165,9 +165,17 @@ export function testDecoderUpgrade(): void {
 		sellCalldata,
 		buyReplacementPattern
 	)
+
 	log.info(
-		"\ntestDecoderUpgrade :: decoded\n · · · method( {} )\n · · · from( {}) \n · · · to( {})\n · · · id( {}) ",
-		[decodedResult.method, decodedResult.from, decodedResult.to, decodedResult.token]
+		"\ntestDecoderUpgrade :: abi decoded\n · · · method( {} )\n · · · from( {}) \n · · · to( {})\n · · · id( {}) ",
+		[decodedResult.method, decodedResult.from, decodedResult.to, decodedResult.token.toString()]
+	)
+	let orderDecoded = orders.helpers.decodeData(orders.helpers.guardedArrayReplace(
+		buyCalldata, sellCalldata, buyReplacementPattern
+	))
+	log.info(
+		"\ntestDecoderUpgrade :: order decoded\n · · · method( {} )\n · · · from( {}) \n · · · to( {})\n · · · id( {}) ",
+		[orderDecoded[0], orderDecoded[1], orderDecoded[2], shared.helpers.hexToBigInt(orderDecoded[3]).toString()]
 	)
 }
 
