@@ -1,6 +1,6 @@
 import { BigInt } from "@graphprotocol/graph-ts"
 import { integer } from "@protofire/subgraph-toolkit"
-import { MinuteVolume, HourVolume, DayVolume, WeekVolume } from "../../../generated/schema"
+import { MinuteVolume, HourVolume, DayVolume, WeekVolume } from "../../generated/schema"
 
 export namespace volumes {
 	export namespace minute {

@@ -1,7 +1,6 @@
 import { Address, Bytes, BigInt, ethereum, TypedMap } from "@graphprotocol/graph-ts"
 import { newMockEvent, newMockCall, assert, log, createMockedFunction } from "matchstick-as"
 
-
 export namespace tests {
 
 	// export namespace mappingsWrapper {

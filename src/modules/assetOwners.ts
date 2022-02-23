@@ -1,4 +1,4 @@
-import { AssetOwner } from "../../../generated/schema"
+import { AssetOwner } from "../../generated/schema"
 
 export namespace assetOwners {
 	export function getOrCreateAssetOwner(

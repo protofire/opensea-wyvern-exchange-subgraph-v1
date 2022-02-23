@@ -1,8 +1,7 @@
 import { BigInt, Bytes, log, TypedMap } from '@graphprotocol/graph-ts'
 import { ethereum } from "@graphprotocol/graph-ts";
 import { bytes, integer } from '@protofire/subgraph-toolkit';
-import { Order } from '../../../generated/schema';
-import { blocks, transactions } from "../index";
+import { blocks, transactions } from "./";
 
 export let SECONDS_IN_MINUTE = 60 * 60
 export let SECONDS_IN_HOUR = SECONDS_IN_MINUTE * 60

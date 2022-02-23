@@ -1,5 +1,5 @@
 import { BigInt, Bytes } from "@graphprotocol/graph-ts";
-import { Transaction } from "../../../generated/schema";
+import { Transaction } from "../../generated/schema";
 
 
 export namespace transactions {

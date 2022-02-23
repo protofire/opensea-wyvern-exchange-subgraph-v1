@@ -1,6 +1,6 @@
 import { BigInt } from "@graphprotocol/graph-ts"
 import { integer } from "@protofire/subgraph-toolkit"
-import { Balance } from "../../../generated/schema"
+import { Balance } from "../../generated/schema"
 
 export namespace balances {
 	export namespace helpers {

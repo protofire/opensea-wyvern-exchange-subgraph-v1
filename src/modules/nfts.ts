@@ -1,6 +1,5 @@
 import { BigInt, ByteArray, log } from "@graphprotocol/graph-ts"
-import { bytes } from "@protofire/subgraph-toolkit"
-import { Nft, NftTransfer } from "../../../generated/schema"
+import { Nft, NftTransfer } from "../../generated/schema"
 
 export namespace nfts {
 	export function getOrCreateNft(

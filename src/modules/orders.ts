@@ -1,7 +1,6 @@
 import { Address, BigInt, Bytes, log, TypedMap } from "@graphprotocol/graph-ts";
-import { OrderApprovedPartOne__Params, OrderApprovedPartTwo__Params } from "../../../generated/openseaWyvernExchange/openseaWyvernExchange";
-import { Order } from "../../../generated/schema";
-import { shared } from "..";
+import { Order } from "../../generated/schema";
+import { shared } from "./";
 
 export namespace orders {
 

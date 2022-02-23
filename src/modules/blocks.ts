@@ -1,6 +1,5 @@
-import { integer } from "@protofire/subgraph-toolkit";
-import { BigInt, log } from "@graphprotocol/graph-ts";
-import { Block } from "../../../generated/schema";
+import { BigInt } from "@graphprotocol/graph-ts";
+import { Block } from "../../generated/schema";
 
 
 export namespace blocks {

@@ -1,5 +1,5 @@
 import { Bytes } from "@graphprotocol/graph-ts"
-import { Token } from "../../../generated/schema"
+import { Token } from "../../generated/schema"
 
 export namespace tokens {
 	export function getOrCreateToken(address: Bytes): Token {

@@ -1,5 +1,5 @@
 import { BigInt } from "@graphprotocol/graph-ts"
-import { Erc20Transaction } from "../../../generated/schema"
+import { Erc20Transaction } from "../../generated/schema"
 
 
 export namespace events {

@@ -1,5 +1,5 @@
 import { Address, BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts";
-import { shared } from "..";
+import { shared } from "./";
 
 export namespace abi {
 
@@ -59,36 +59,65 @@ export namespace abi {
 		 * atomicize(address[],uint256[],uint256[],bytes)
 		 * 
 		 * The calldata input is formated as:
-		 * Format =>  0x | METHOD_ID (atomicize)  |   ?   | NB_TOKEN | ADDRESS_LIST
-		 * Size   =>  W  |           X            | Y * 4 |     Y    |    Y * Z
+		 * Format =>   METHOD_ID (atomicize)  |   ?   | ADDRESS_LIST_LENGTH | ADDRESS_LIST
+		 * Size   =>             X            | Y * 4 |          Y          |    Y * Z
 		 * ... continues ...
-		 * Format => ... |  METADATA_AND_PARAMS_CHUNKS | TRANSFERS_CALLDATA  
-		 * Size   => ... |    ( ( M + P ) * 2 ) + P    |        T * Z       
+		 * Format =>   ADDRESS_LIST_LENGTH |  ADDRESS_LIST
+		 * Size   =>           Y           |     Y * Z
+		 * ... continues ...
+		 * Format =>   VALUES_LIST_LENGTH  |  VALUES_LIST
+		 * Size   =>           Y           |     Y * Z
+		 * ... continues ...
+		 * Format =>   CALLDATAS_LENGTHS_LIST_LENGTH  |  CALLDATAS_LENGTHS_LIST
+		 * Size   =>                Y                 |        Y * Z
+		 * ... continues ...
+		 * Format => ... |  CALLDATAS_LENGTH  |  CALL_DATAS  
+		 * Size   => ... |          Y         |     2 * L
 		 * 
-		 *      Where :
-		 * 	
-		 * 			- W = 16 bits (2 hex chars)
-		 *          - X = 32 bits (8 hex chars)
-		 *          - Y = 256 bits (64 hex chars)
-		 *          - Z = value stored in "NB_TOKEN" section (amount of transfers),
+		 *      Where : 
+		 *          - X = 32 bits (8 hex chars) (4 Bytes)
+		 *          - Y = 256 bits (64 hex chars) (32 Bytes) 
+		 *          - Z = value stored in "ADDRESS_LIST_LENGTH" section (amount of array entries),
 		 * 					each address has a "Y" length
-		 * 			- M = Metadata chunk of length "Y"
-		 * 			- P = Params chunk of length "Y * Z"
-		 * 			- T = "TransferFrom" call data of length X + (Y * 3)
-		 * 
+		 * 			- L = value stored in "CALLDATAS_LENGTH" section (amount of bytes),
+		 * 					the total length of the callDatas Bytes bundle
 		 */
 
 		let mergedCallData = guardedArrayReplace(buyCallData, sellCallData, replacementPattern)
 		return decodeAbi_Atomicize_Method(mergedCallData)
 	}
 
-	function decodeAbi_Atomicize_Method(callData: string,): Decoded_atomicize_Result {
+	function decodeAbi_Atomicize_Method(_callData: Bytes,): Decoded_atomicize_Result {
+
+		let dataWithoutFunctionSelector: Bytes = changetype<Bytes>(
+			_callData.subarray(4)
+		);
+
+
+		// As function encoding is not handled yet by the lib, we first need to reach the offset of where the
+		// actual params are located. As they are all dynamic we can just fetch the offset of the first param
+		// and then start decoding params from there as known sized types
+		let index: i32 = ethereum
+			.decode("uint256", changetype<Bytes>(dataWithoutFunctionSelector))!
+			.toBigInt()
+			.toI32();
+
+		// Get the length of the first array. All arrays must have same length so fetching only this one is enough
+		let arrayLength: i32 = ethereum
+			.decode(
+				"uint256",
+				changetype<Bytes>(dataWithoutFunctionSelector.subarray(index))
+			)!
+			.toBigInt()
+			.toI32();
+
 		const TRAILING_0x = 2
 		const METHOD_ID_LENGTH = 8
 		const UINT_256_LENGTH = 64
 
 		let indexStartNbToken = TRAILING_0x + METHOD_ID_LENGTH + UINT_256_LENGTH * 4;
 		let indexStopNbToken = indexStartNbToken + UINT_256_LENGTH;
+		let callData = _callData.toHexString()
 		let nbTokenStr = callData.substring(indexStartNbToken, indexStopNbToken);
 
 		let nbToken = shared.helpers.hexToBigInt(nbTokenStr).toI32()
@@ -140,12 +169,11 @@ export namespace abi {
 		 * transferFrom(address,address,uint256)
 		 * 
 		 * The calldata input is formated as:
-		 * Format =>  0x | METHOD_ID (transferFrom) | FROM | TO | TOKEN_ID
-		 * Size   =>  W  |            X             |   Y  |  Y |    Y
+		 * Format =>  METHOD_ID (transferFrom) | FROM | TO | TOKEN_ID
+		 * Size   =>             X             |   Y  |  Y |    Y
 		 *      Where :
-		 * 			- W = 16 bits (2 hex chars) | 0 
-		 *          - X = 32 bits (8 hex chars)
-		 *          - Y = 256 bits (64 hex chars)
+		 *          - X = 32 bits (8 hex chars) (4 Bytes) 
+		 *          - Y = 256 bits (64 hex chars) (32 Bytes)
 		 * 
 		 * 
 		 */
@@ -156,6 +184,11 @@ export namespace abi {
 	}
 
 	export function decodeAbi_transferFrom_Method(callData: Bytes): Decoded_TransferFrom_Result {
+		/**
+		 * callData as bytes doesn't have a trailing 0x but represents a hex string
+		 * first 4 Bytes cointains 8 hex chars for the function selector
+		 * 0.5 Bytes == 4 bits == 1 hex char
+		 */
 		let dataWithoutFunctionSelector = Bytes.fromUint8Array(callData.subarray(4))
 		let decoded = ethereum.decode(
 			"(address,address,uint256)", dataWithoutFunctionSelector
