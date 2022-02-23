@@ -2,10 +2,8 @@ import { BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts";
 import { bytes } from "@protofire/subgraph-toolkit";
 import { log, logStore } from "matchstick-as";
 
-export namespace orders {
+export namespace decoder {
 	export namespace helpers {
-
-
 		export function decodeBatchData(mergedCallData: string): string[] {
 			const TRAILING_0x = 2
 			const METHOD_ID_LENGTH = 8

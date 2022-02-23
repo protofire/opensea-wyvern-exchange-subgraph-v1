@@ -5,9 +5,10 @@ import {
 } from "./decodeSingleSale.test";
 import {
 	testDecoderUpgrade,
-	test_decode_transferFrom_noTrail,
-	testBatch
 } from "./callDataReplacement.test"
+import {
+	decodeBatchSale,
+} from "./decodeBatchSale.test"
 
 
 
@@ -23,6 +24,10 @@ function runTests(): void {
 	test(
 		"testDecoderUpgrade",
 		testDecoderUpgrade
+	)
+	test(
+		"decodeBatchSale",
+		decodeBatchSale
 	)
 	// test(
 	// 	"test_decode_transferFrom_noTrail",
