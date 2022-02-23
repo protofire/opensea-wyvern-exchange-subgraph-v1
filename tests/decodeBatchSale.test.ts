@@ -1,6 +1,7 @@
 import { Bytes, ethereum } from "@graphprotocol/graph-ts";
 import { log } from "matchstick-as";
 import { abi, shared } from "../src/modules";
+import { decoder } from "./modules";
 
 export function decodeBatchSale(): void {
 	/*
@@ -46,25 +47,18 @@ export function decodeBatchSale(): void {
 		[buyMergedData.toHexString()]
 	)
 
-	let dataWithoutFunctionSelector: Bytes = changetype<Bytes>(
-		buyMergedData.subarray(4)
-	);
+	let stringDecoded = decoder.helpers.decodeBatchData(buyMergedData.toHexString())
 
-	let offset: i32 = ethereum
-		.decode("uint256", changetype<Bytes>(dataWithoutFunctionSelector))!
-		.toBigInt()
-		.toI32();
-
-	let arrayLength: i32 = ethereum
-		.decode(
-			"uint256",
-			changetype<Bytes>(dataWithoutFunctionSelector.subarray(offset))
-		)!
-		.toBigInt()
-		.toI32();
 	log.info(
-		"\decodeBatchSale :: decoded\n · · · offset( {} ) \n · · · arrayLength( {} )",
-		[offset.toString(), arrayLength.toString()]
+		"\decodeBatchSale :: string decoded\n · · · method( {} )\n · · · addressList( {} ) \n · · · TransfersList( {} )",
+		[stringDecoded.method, stringDecoded.addressList.toString(), stringDecoded.transfers.toString()]
+	)
+
+	let abiDecoded = abi.decodeAbi_Atomicize_Method(buyMergedData)
+
+	log.info(
+		"\decodeBatchSale :: abi decoded\n · · · method( {} )\n · · · addressList( {} ) \n · · · TransfersList( {} )",
+		[abiDecoded.method, abiDecoded.addressList.toString(), abiDecoded.transfers.toString()]
 	)
 }
 

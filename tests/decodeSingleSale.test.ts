@@ -64,7 +64,7 @@ test data
 	// require(ArrayUtils.arrayEq(buyCalldata, sell.calldata));
 
 	log.info(
-		"testCallDataReplacement :: guardedArrayReplace \n · · · buyMergedData( {} )\n · · · sellMergedData( {})",
+		"singleSaleTest :: guardedArrayReplace \n · · · buyMergedData( {} )\n · · · sellMergedData( {})",
 		[buyMergedData.toHexString(), sellMergedData.toHexString()]
 	)
 
@@ -145,7 +145,7 @@ export function decodeSingleSale_0xdceaf1652a131f32a821468dc03a92df0edd86ea_2fb1
 	// require(ArrayUtils.arrayEq(buyCalldata, sell.calldata));
 
 	log.info(
-		"\ntestCallDataReplacement :: guardedArrayReplace \n · · · buyMergedData( {} )\n · · · sellMergedData( {})",
+		"\singleSaleTest :: guardedArrayReplace \n · · · buyMergedData( {} )\n · · · sellMergedData( {})",
 		[buyMergedData.toHexString(), sellMergedData.toHexString()]
 	)
 
@@ -172,11 +172,11 @@ function singleSaleTest(callData: Bytes, expectedValues: abi.Decoded_TransferFro
 	)
 
 	log.info(
-		"\ntestCallDataReplacement :: string decoded\n · · · method( {} )\n · · · from( {}) \n · · · to( {})\n · · · id( {}) ",
+		"\singleSaleTest :: string decoded\n · · · method( {} )\n · · · from( {}) \n · · · to( {})\n · · · id( {}) ",
 		[stringDecoded[0], stringDecoded[1], stringDecoded[2], stringDecoded[3]]
 	)
 	log.info(
-		"\ntestCallDataReplacement :: string decoded (parsed)\n · · · method( {} )\n · · · from( {}) \n · · · to( {})\n · · · id( {}) ",
+		"\singleSaleTest :: string decoded (parsed)\n · · · method( {} )\n · · · from( {}) \n · · · to( {})\n · · · id( {}) ",
 		[stringDecodedResult.method, stringDecodedResult.from.toHexString(), stringDecodedResult.to.toHexString(), stringDecodedResult.token.toString()]
 	)
 

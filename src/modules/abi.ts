@@ -1,15 +1,16 @@
 import { Address, BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts";
+import { log } from "matchstick-as";
 import { shared } from "./";
 
 export namespace abi {
 
 	export class Decoded_atomicize_Result {
 		method: string
-		addressList: Array<string>
+		addressList: Array<Address>
 		transfers: Array<Decoded_TransferFrom_Result>
 		constructor(
 			_method: string,
-			_addressList: Array<string>,
+			_addressList: Array<Address>,
 			_transfers: Array<Decoded_TransferFrom_Result>,
 		) {
 			this.method = _method
@@ -47,7 +48,7 @@ export namespace abi {
 		}
 
 		public toLogFormattedString(): string {
-			return "\n · · · · · · method( " + this.method + " )\n · · · · · · from( " + this.from.toHexString() + " ) \n · · · · · · to( " + this.to.toHexString() + " )\n · · · · · · id( " + this.token.toString() + " ) "
+			return `\n · · · · · · method( ${this.method} )\n · · · · · · from( ${this.from.toHexString()} ) \n · · · · · · to( ${this.to.toHexString()} )\n · · · · · · id( ${this.token} ) `
 		}
 	}
 
@@ -87,7 +88,7 @@ export namespace abi {
 		return decodeAbi_Atomicize_Method(mergedCallData)
 	}
 
-	function decodeAbi_Atomicize_Method(_callData: Bytes,): Decoded_atomicize_Result {
+	export function decodeAbi_Atomicize_Method(_callData: Bytes,): Decoded_atomicize_Result {
 
 		let dataWithoutFunctionSelector: Bytes = changetype<Bytes>(
 			_callData.subarray(4)
@@ -97,7 +98,7 @@ export namespace abi {
 		// As function encoding is not handled yet by the lib, we first need to reach the offset of where the
 		// actual params are located. As they are all dynamic we can just fetch the offset of the first param
 		// and then start decoding params from there as known sized types
-		let index: i32 = ethereum
+		let offset: i32 = ethereum
 			.decode("uint256", changetype<Bytes>(dataWithoutFunctionSelector))!
 			.toBigInt()
 			.toI32();
@@ -106,58 +107,90 @@ export namespace abi {
 		let arrayLength: i32 = ethereum
 			.decode(
 				"uint256",
-				changetype<Bytes>(dataWithoutFunctionSelector.subarray(index))
+				changetype<Bytes>(dataWithoutFunctionSelector.subarray(offset))
 			)!
 			.toBigInt()
 			.toI32();
+		offset += 1 * 32;
 
-		const TRAILING_0x = 2
-		const METHOD_ID_LENGTH = 8
-		const UINT_256_LENGTH = 64
 
-		let indexStartNbToken = TRAILING_0x + METHOD_ID_LENGTH + UINT_256_LENGTH * 4;
-		let indexStopNbToken = indexStartNbToken + UINT_256_LENGTH;
-		let callData = _callData.toHexString()
-		let nbTokenStr = callData.substring(indexStartNbToken, indexStopNbToken);
+		// Now that we know the size of each params we can decode them one by one as know sized types
+		// function atomicize(address[] addrs,uint256[] values,uint256[] calldataLengths,bytes calldatas)
+		let decodedAddresses: Address[] = ethereum
+			.decode(
+				`address[${arrayLength}]`,
+				changetype<Bytes>(dataWithoutFunctionSelector.subarray(offset))
+			)!
+			.toAddressArray();
+		offset += arrayLength * 32;
 
-		let nbToken = shared.helpers.hexToBigInt(nbTokenStr).toI32()
-		let addressList = new Array<string>();
+		offset += 1 * 32;
+		// We don't need those values, just move the offset forward
+		// let decodedValues: BigInt[] = ethereum.decode(
+		//   `uint256[${arrayLength}]`,
+		//   changetype<Bytes>(dataWithoutFunctionSelector.subarray(offset))
+		// )!.toBigIntArray();
+		offset += arrayLength * 32;
 
-		// Get the associated NFT contracts
-		let offset = indexStopNbToken;
-		for (let i = 0; i < nbToken; i++) {
-			let addrs = callData.substring(offset, offset + UINT_256_LENGTH);
-			addressList.push(addrs);
+		offset += 1 * 32;
+		let decodedCalldataIndividualLengths = ethereum
+			.decode(
+				`uint256[${arrayLength}]`,
+				changetype<Bytes>(dataWithoutFunctionSelector.subarray(offset))
+			)!
+			.toBigIntArray()
+			.map<i32>(e => e.toI32());
+		offset += arrayLength * 32;
 
-			// Move forward in the call data
-			offset += UINT_256_LENGTH;
+		let decodedCallDatasLength = ethereum
+			.decode(
+				"uint256",
+				changetype<Bytes>(dataWithoutFunctionSelector.subarray(offset))
+			)!
+			.toBigInt()
+			.toI32();
+		offset += 1 * 32;
+
+		let callDatas: Bytes = changetype<Bytes>(
+			dataWithoutFunctionSelector.subarray(
+				offset,
+				offset + decodedCallDatasLength
+			)
+		);
+
+		let addressList = new Array<Address>()
+		let transfersList = new Array<abi.Decoded_TransferFrom_Result>()
+
+		let calldataOffset = 0;
+		for (let i = 0; i < decodedAddresses.length; i++) {
+			let callDataLength = decodedCalldataIndividualLengths[i];
+			let calldata: Bytes = changetype<Bytes>(
+				callDatas.subarray(calldataOffset, calldataOffset + callDataLength)
+			);
+
+			// Sometime the call data is not a transferFrom (ie: https://etherscan.io/tx/0xe8629bfc57ab619a442f027c46d63e1f101bd934232405fa8e8eaf156bfca848)
+			// Ignore if not transferFrom
+			let functionSelector = changetype<Bytes>(
+				calldata.subarray(0, 4)
+			).toHexString();
+			log.info("\n selector ( {} ) \n data ( {} )", [functionSelector, calldata.toHexString()])
+			if (functionSelector == "0x23b872dd") {
+				addressList.push(decodedAddresses[i]);
+				let decoded = abi.decodeAbi_transferFrom_Method(calldata)
+				transfersList.push(decoded)
+
+			}
+
+			calldataOffset += callDataLength;
 		}
-
-		const METADATA_AND_PARAMS_CHUNK_LENGTH = UINT_256_LENGTH + nbToken * UINT_256_LENGTH
-		const CHUNKS_SECTION = METADATA_AND_PARAMS_CHUNK_LENGTH * 2 + UINT_256_LENGTH
-		offset += CHUNKS_SECTION
-
-		// Get the "TransferFrom" method calls
-		const TRANSFER_CALL_DATA_LENGTH = METHOD_ID_LENGTH + UINT_256_LENGTH * 3;
-
-		let transfersList = new Array<Decoded_TransferFrom_Result>()
-
-		for (let i = 0; i < nbToken; i++) {
-			let transferFromData = callData.substring(offset, offset + TRANSFER_CALL_DATA_LENGTH);
-			let decoded = decodeAbi_transferFrom_Method(transferFromData, false)
-			transfersList.push(decoded);
-
-			// Move forward in the call data
-			offset += TRANSFER_CALL_DATA_LENGTH;
-		}
-
-		let methodId = callData.substring(TRAILING_0x, TRAILING_0x + METHOD_ID_LENGTH);
+		let functionSelector = Bytes.fromUint8Array(_callData.subarray(0, 4)).toHex().slice(2)
 
 		return new Decoded_atomicize_Result(
-			methodId,
+			functionSelector,
 			addressList,
 			transfersList
 		)
+
 	}
 
 	// TODO: return a typed map
@@ -189,6 +222,7 @@ export namespace abi {
 		 * first 4 Bytes cointains 8 hex chars for the function selector
 		 * 0.5 Bytes == 4 bits == 1 hex char
 		 */
+
 		let dataWithoutFunctionSelector = Bytes.fromUint8Array(callData.subarray(4))
 		let decoded = ethereum.decode(
 			"(address,address,uint256)", dataWithoutFunctionSelector
