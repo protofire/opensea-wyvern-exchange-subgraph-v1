@@ -111,15 +111,12 @@ export function handleAtomicMatch_(call: AtomicMatch_Call): void {
 
   // buyMaker
   let buyer = accounts.getOrCreateAccount(buyMakerAddress, transaction.id)
-  buyer.lastUpdatedAt = transaction.id
   buyer.save()
 
   let seller = accounts.getOrCreateAccount(sellMakerAddress || buyTakerAddress, transaction.id)
-  seller.lastUpdatedAt = transaction.id
   seller.save()
 
   let sellTaker = accounts.getOrCreateAccount(sellTakerAddress, transaction.id)
-  sellTaker.lastUpdatedAt = transaction.id
   sellTaker.save()
 
 

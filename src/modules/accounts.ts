@@ -12,6 +12,7 @@ export namespace accounts {
 			entity.createdAt = txId
 			entity.lastUpdatedAt = txId
 		}
+		entity.lastUpdatedAt = txId
 		return entity as Account
 	}
 }

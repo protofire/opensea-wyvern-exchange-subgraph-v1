@@ -23,11 +23,9 @@ export namespace mappingHelpers {
 		sale.save()
 
 		let buyer = accounts.getOrCreateAccount(to, transactionId)
-		buyer.lastUpdatedAt = transactionId
 		buyer.save()
 
 		let seller = accounts.getOrCreateAccount(from, transactionId)
-		seller.lastUpdatedAt = transactionId
 		seller.save()
 
 
@@ -62,11 +60,9 @@ export namespace mappingHelpers {
 			let contractAddress = decoded.addressList[i]
 
 			let buyer = accounts.getOrCreateAccount(to, transactionId)
-			buyer.lastUpdatedAt = transactionId
 			buyer.save()
 
 			let seller = accounts.getOrCreateAccount(from, transactionId)
-			seller.lastUpdatedAt = transactionId
 			seller.save()
 
 			let contract = assets.getOrCreateAsset(contractAddress)
