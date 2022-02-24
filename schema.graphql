@@ -250,17 +250,6 @@ type Asset @entity {
 
 }
 
-type AssetOwner @entity {
-  "internal id used for indexation"
-  id: ID! # Set to `${asset.id}-${owner.id}`
-
-  "contract's asset"
-  asset: Asset!
-
-  "Account which owns an asset"
-  owner: Account!
-
-}
 
 type Token @entity {
   "internal id used for indexation"
