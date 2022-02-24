@@ -1,7 +1,6 @@
 export * from "./abi"
 export * from "./accounts"
 export * from "./assets"
-export * from "./assetOwners"
 export * from "./balances"
 export * from "./blocks"
 export * from "./nfts"
