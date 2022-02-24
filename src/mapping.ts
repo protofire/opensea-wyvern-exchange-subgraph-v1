@@ -122,12 +122,6 @@ export function handleAtomicMatch_(call: AtomicMatch_Call): void {
   sellTaker.lastUpdatedAt = transaction.id
   sellTaker.save()
 
-  // FIXME DIFFERENT HANDLER FOR BUNDLE SALE
-  let asset = assets.getOrCreateAsset(call.inputs.addrs[4])
-  asset.save()
-
-  let assetOwner = assetOwners.getOrCreateAssetOwner(buyer.id, asset.id) // not sure if owner is taker or maker or who tf is
-  assetOwner.save()
 
   let paymentToken = tokens.getOrCreateToken(call.inputs.addrs[6])
   paymentToken.save()
@@ -182,7 +176,7 @@ export function handleAtomicMatch_(call: AtomicMatch_Call): void {
     call.inputs.feeMethodsSidesKindsHowToCalls[0],
     call.inputs.feeMethodsSidesKindsHowToCalls[1],
     call.inputs.feeMethodsSidesKindsHowToCalls[2],
-    asset.id, call.inputs.feeMethodsSidesKindsHowToCalls[3],
+    call.inputs.addrs[4].toHexString(), call.inputs.feeMethodsSidesKindsHowToCalls[3],
     call.inputs.calldataBuy, call.inputs.replacementPatternBuy,
     call.inputs.addrs[5], call.inputs.staticExtradataBuy,
     paymentToken.id, call.inputs.uints[4], call.inputs.uints[5],
@@ -213,7 +207,7 @@ export function handleAtomicMatch_(call: AtomicMatch_Call): void {
     call.inputs.feeMethodsSidesKindsHowToCalls[4],
     call.inputs.feeMethodsSidesKindsHowToCalls[5],
     call.inputs.feeMethodsSidesKindsHowToCalls[6],
-    asset.id, call.inputs.feeMethodsSidesKindsHowToCalls[7],
+    call.inputs.addrs[11].toHexString(), call.inputs.feeMethodsSidesKindsHowToCalls[7],
     call.inputs.calldataSell, call.inputs.replacementPatternSell,
     call.inputs.addrs[12], call.inputs.staticExtradataSell,
     paymentToken.id, call.inputs.uints[13], call.inputs.uints[14],
@@ -255,20 +249,17 @@ export function handleAtomicMatch_(call: AtomicMatch_Call): void {
       buyOrder.callData!, sellOrder.callData!, buyOrder.replacementPattern!
     );
 
+    mappingHelpers.handleBundleSale(
+      decoded, transaction.id, paymentToken.id, sellerAmount, timestamp
+    )
 
-    for (let i = 0; i < decoded.transfers.length; i++) {
-
-      mappingHelpers.handleSale(
-        decoded.transfers[i], transaction.id, asset.address!, paymentToken.id, sellerAmount, timestamp
-      )
-    }
 
   } else {
     let decoded = abi.decodeSingleNftData(
       buyOrder.callData!, sellOrder.callData!, buyOrder.replacementPattern!
     );
-    mappingHelpers.handleSale(
-      decoded, transaction.id, asset.address!, paymentToken.id, sellerAmount, timestamp
+    mappingHelpers.handleSingleSale(
+      decoded, transaction.id, call.inputs.addrs[11], paymentToken.id, sellerAmount, timestamp
     )
 
   }
