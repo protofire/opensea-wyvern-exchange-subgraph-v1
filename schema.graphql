@@ -1,3 +1,179 @@
+"A Sale is the relationship between matched orders"
+type Sale @entity {
+
+  "internal id used for indexation"
+  id: ID!
+
+  contract: Asset
+
+  nft: Nft
+
+  token: Token
+
+  # derived relationships
+
+  "Nft transfers made for this sell"
+  nftTransactions: [NftTransaction!]! @derivedFrom(field:"sale")
+
+  "the peyment for this sale"
+  erc20Transaction: Erc20Transaction @derivedFrom(field:"sale")
+
+  "Orders that made this Sale, must be a 2 entries array, one Buy Order and one Sell Order"
+  orders: [Order!]! @derivedFrom(field: "sale")
+
+   # time series relationships
+
+  "related minute entity"
+  minute: Minute
+  
+  "related hour entity"
+  hour: Hour
+
+  "related day entity"
+  day: Day
+
+  "related week entity"
+  week: Week
+
+  # volume relationships
+
+  "related minuteVolume entity"
+  minuteVolume: MinuteVolume
+  
+  "related hourVolume entity"
+  hourVolume: HourVolume
+
+  "related dayVolume entity"
+  dayVolume: DayVolume
+
+  "related weekVolume entity"
+  weekVolume: WeekVolume
+
+  # metadata relationships
+
+  "related evm block"
+  block: Block
+
+  "related evm transaction"
+  transaction: Transaction
+ 
+}
+
+
+type NftTransaction @entity {
+  "Internal ID used for indexation"
+	id: ID!
+
+  "event timestamp"
+	timestamp: BigInt!
+
+  "Account sending the value"
+  from: Account!
+
+  "Account receiving the value"
+  to: Account!
+
+  "related token"
+  nft: Nft!
+
+  "related sale"
+  sale: Sale
+
+  # time series relationships
+
+  "related minute entity"
+  minute: Minute
+  
+  "related hour entity"
+  hour: Hour
+
+  "related day entity"
+  day: Day
+
+  "related week entity"
+  week: Week
+
+  # volume relationships
+
+  "related minuteVolume entity"
+  minuteVolume: MinuteVolume
+  
+  "related hourVolume entity"
+  hourVolume: HourVolume
+
+  "related dayVolume entity"
+  dayVolume: DayVolume
+
+  "related weekVolume entity"
+  weekVolume: WeekVolume
+
+  # metadata relationships
+
+  "related evm block"
+  block: Block
+
+  "related evm transaction"
+  transaction: Transaction
+
+}
+
+type Erc20Transaction @entity{
+  "Internal ID used for indexation"
+	id: ID!
+
+  "event timestamp"
+	timestamp: BigInt!
+
+  "Account sending the value"
+  from: Account!
+
+  "Account receiving the value"
+  to: Account!
+
+  "related token"
+  token: Token!
+
+  "amount of the transaction"
+  amount: BigInt!
+
+  "a related balance entity"
+  balance: Balance
+
+  "related sale"
+  sale: Sale
+
+   # time series relationships
+
+  "related minute entity"
+  minute: Minute
+  
+  "related hour entity"
+  hour: Hour
+
+  "related day entity"
+  day: Day
+
+  "related week entity"
+  week: Week
+
+  "related minuteVolume entity"
+  minuteVolume: MinuteVolume
+  
+  "related hourVolume entity"
+  hourVolume: HourVolume
+
+  "related dayVolume entity"
+  dayVolume: DayVolume
+
+  "related weekVolume entity"
+  weekVolume: WeekVolume
+
+  "related block"
+  block: Block
+
+  "related transaction"
+  transaction: Transaction
+}
 
 
 type Account @entity {
@@ -32,6 +208,27 @@ type Account @entity {
   lastUpdatedAt: Transaction!
 }
 
+
+type Nft @entity {
+  "internal id used for indexation"
+  id: ID!
+
+  "token's id inside the token"
+  tokenId: BigInt
+
+  "related nft contract"
+  contract: Asset
+
+  "Account which owns an asset"
+  owner: Account!
+
+  "related transactions"
+  nftTransactions: [NftTransaction!]! @derivedFrom(field: "nft")
+
+  "related sales"
+  sales: [Sale!]! @derivedFrom(field: "nft")
+}
+
 type Asset @entity { 
   "internal id used for indexation"
   id: ID!
@@ -44,6 +241,12 @@ type Asset @entity {
 
   # owners:
   owners: [AssetOwner!]! @derivedFrom(field: "asset")
+
+  # nfts contained in this contract
+  nfts: [Nft!]! @derivedFrom(field: "contract")
+
+  # related sales
+  sales: [Sale!]! @derivedFrom(field: "contract")
 
 }
 
@@ -59,15 +262,7 @@ type AssetOwner @entity {
 
 }
 
-interface Erc20Token {
-  "internal id used for indexation"
-  id: ID!
-
-  "asset contract's address"
-  address: Bytes
-}
-
-type Token implements Erc20Token @entity {
+type Token @entity {
   "internal id used for indexation"
   id: ID!
 
@@ -77,8 +272,14 @@ type Token implements Erc20Token @entity {
   "all the orders where this token was used to pay"
   orders: [Order!]! @derivedFrom(field: "paymentToken")
 
+  "related balances"
+  balances: [Balance!]! @derivedFrom(field: "token")
+  
+  "related transactions"
   erc20Transactions: [Erc20Transaction!]! @derivedFrom(field: "token")
 
+  "related sales"
+  sales: [Sale!]! @derivedFrom(field: "token")
 
   "related minuteVolume entity"
   minuteVolumes: [MinuteVolume!]! @derivedFrom(field: "token")
@@ -121,13 +322,6 @@ interface Metadata {
 	id: ID!
 }
 
-interface Event {
-  "Internal ID used for indexation"
-	id: ID!
-
-  "event timestamp"
-	timestamp: BigInt!
-}
 
 type Block implements Metadata @entity {
 	"Internal ID used for indexation"
@@ -168,7 +362,7 @@ type Transaction implements Metadata @entity {
 
 	"Transaction's hash"
 	hash: Bytes
-
+  
 	"Sender Address"
 	from: Bytes
 
@@ -193,63 +387,6 @@ type Transaction implements Metadata @entity {
   week: Week
 }
 
-type Erc20Transaction implements Event @entity{
-  "Internal ID used for indexation"
-	id: ID!
-
-  "event timestamp"
-	timestamp: BigInt!
-
-  "Account sending the value"
-  from: Account!
-
-  "Account receiving the value"
-  to: Account!
-
-  "related token"
-  token: Token!
-
-  "amount of the transaction"
-  amount: BigInt!
-
-  "a related balance entity"
-  balance: Balance
-
-  "related closed order"
-  order: Order
-
-   # time series relationships
-
-  "related minute entity"
-  minute: Minute
-  
-  "related hour entity"
-  hour: Hour
-
-  "related day entity"
-  day: Day
-
-  "related week entity"
-  week: Week
-
-  "related minuteVolume entity"
-  minuteVolume: MinuteVolume
-  
-  "related hourVolume entity"
-  hourVolume: HourVolume
-
-  "related dayVolume entity"
-  dayVolume: DayVolume
-
-  "related weekVolume entity"
-  weekVolume: WeekVolume
-
-  "related block"
-  block: Block
-
-  "related transaction"
-  transaction: Transaction
-}
 
 ##
 
@@ -357,17 +494,17 @@ type Week implements TimeUnit @entity {
   volume: Volume! @derivedFrom(field: "timeUnit")
 }
 
-enum ContractOrderYieldStatus {
-  NONE
-  PART_ONE
-  PART_TWO
-}
+# enum ContractOrderYieldStatus {
+#   NONE
+#   PART_ONE
+#   PART_TWO
+# }
 
-enum OrderStatus {
-  NONE
-  OPEN
-  FILLED
-}
+# enum OrderStatus {
+#   NONE
+#   OPEN
+#   FILLED
+# }
 
 enum FeeMethod { 
   ProtocolFee
@@ -395,10 +532,18 @@ type Order @entity {
   "internal id used for indexation"
   id: ID!
 
-  "current data yield status as thrown by contract"
-  yieldStatus: ContractOrderYieldStatus!
+  # "current data yield status as thrown by contract"
+  # yieldStatus: ContractOrderYieldStatus!
 
-  status: OrderStatus!
+  # status: OrderStatus!
+
+  # nftTransactions: [NftTransaction!]! @derivedFrom(field: "order")
+
+  "order that matched for the same asset"
+  matchedOrder: Order
+
+  "the Sale where this order was involved"
+  sale: Sale 
 
   "hased order content"
   hash: Bytes
@@ -498,8 +643,8 @@ type Order @entity {
   "related transaction"
   transaction: Transaction
 
-  "related transaction if closed"
-  erc20Transaction: Erc20Transaction @derivedFrom(field: "order")
+  # "related transaction if closed"
+  # erc20Transaction: Erc20Transaction @derivedFrom(field: "order")
 
   "related minuteVolume entity"
   minuteVolume: MinuteVolume

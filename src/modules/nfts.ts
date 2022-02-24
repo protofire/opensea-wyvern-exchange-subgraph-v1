@@ -1,5 +1,5 @@
 import { BigInt, ByteArray, log } from "@graphprotocol/graph-ts"
-import { Nft, NftTransfer } from "../../generated/schema"
+import { Nft, NftTransaction } from "../../generated/schema"
 
 export namespace nfts {
 	export function getOrCreateNft(
@@ -35,20 +35,20 @@ export namespace nfts {
 	export function getOrCreateNftTransfer(
 		nftId: string, // the nft entitiy id do not confuse with the tokenId
 		timestamp: BigInt, from: string, to: string,
-		order: string
-	): NftTransfer {
+		sale: string
+	): NftTransaction {
 		let id = timestamp.toString().concat("-").concat(nftId)
-		let entity = NftTransfer.load(id)
+		let entity = NftTransaction.load(id)
 		if (entity == null) {
-			entity = new NftTransfer(id)
+			entity = new NftTransaction(id)
 			entity.nft = nftId
 			entity.timestamp = timestamp
 			entity.from = from
 			entity.from = from
 			entity.to = to
-			entity.order = order
+			entity.sale = sale
 		}
-		return entity as NftTransfer
+		return entity as NftTransaction
 	}
 	export namespace helpers {
 

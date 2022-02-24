@@ -1,18 +1,21 @@
-import { log } from "@graphprotocol/graph-ts"
+import { BigInt, log } from "@graphprotocol/graph-ts"
 import {
   AtomicMatch_Call,
   OrderCancelled,
   OrdersMatched
 } from "../generated/openseaWyvernExchange/openseaWyvernExchange"
 import { Order } from "../generated/schema"
+import { mappingHelpers } from "./mappingHelpers"
 
 import {
+  abi,
   accounts,
   assetOwners,
   assets,
   balances,
   blocks,
   events,
+  nfts,
   orders,
   shared,
   timeSeries,
@@ -32,32 +35,32 @@ export function handleOrderCancelled(event: OrderCancelled): void {
 }
 
 
-export function handleOrdersMatched(event: OrdersMatched): void {
-  let sellOrder = Order.load(event.params.sellHash.toHex())
-  let buyOrder = Order.load(event.params.buyHash.toHex())
-  let order = sellOrder || buyOrder
+// export function handleOrdersMatched(event: OrdersMatched): void {
+//   let sellOrder = Order.load(event.params.sellHash.toHex())
+//   let buyOrder = Order.load(event.params.buyHash.toHex())
+//   let order = sellOrder || buyOrder
 
-  if (!order) {
-    log.warning("handleOrdersMatched :: missing sell and buy ABORTING", [])
-    return
-  }
+//   if (!order) {
+//     log.warning("handleOrdersMatched :: missing sell and buy ABORTING", [])
+//     return
+//   }
 
-  log.info(
-    "handleOrdersMatched :: [sell is {}] [buy is {}]",
-    [sellOrder ? sellOrder.id : "missing", buyOrder ? buyOrder.id : "missing"]
-  )
+//   log.info(
+//     "handleOrdersMatched :: [sell is {}] [buy is {}]",
+//     [sellOrder ? sellOrder.id : "missing", buyOrder ? buyOrder.id : "missing"]
+//   )
 
-  order = orders.mutations.setAsFilled(order)
+//   order = orders.mutations.setAsFilled(order)
 
-  if (buyOrder && sellOrder) {
-    let sellCallData = sellOrder.callData!
-    let buyCallData = buyOrder.callData!
-    log.info("handleOrdersMatched :: both buy and sell are present", [])
-    log.warning("call data are: [sell: {}][buy: {}]", [sellCallData.toHexString(), buyCallData.toHexString()])
+//   if (buyOrder && sellOrder) {
+//     let sellCallData = sellOrder.callData!
+//     let buyCallData = buyOrder.callData!
+//     log.info("handleOrdersMatched :: both buy and sell are present", [])
+//     log.warning("call data are: [sell: {}][buy: {}]", [sellCallData.toHexString(), buyCallData.toHexString()])
 
-  }
+//   }
 
-}
+// }
 
 /*
  params
@@ -100,6 +103,12 @@ export function handleAtomicMatch_(call: AtomicMatch_Call): void {
 
 
 
+  //TODO relate filled orders
+  //TODO handle bundle sales
+  //TODO get asset token ids
+  //TODO add counters
+
+
   // buyMaker
   let buyer = accounts.getOrCreateAccount(buyMakerAddress, transaction.id)
   buyer.lastUpdatedAt = transaction.id
@@ -113,6 +122,7 @@ export function handleAtomicMatch_(call: AtomicMatch_Call): void {
   sellTaker.lastUpdatedAt = transaction.id
   sellTaker.save()
 
+  // FIXME DIFFERENT HANDLER FOR BUNDLE SALE
   let asset = assets.getOrCreateAsset(call.inputs.addrs[4])
   asset.save()
 
@@ -184,7 +194,7 @@ export function handleAtomicMatch_(call: AtomicMatch_Call): void {
   buyOrder.week = week.id
   buyOrder.transaction = transaction.id
   buyOrder.block = blockId
-  buyOrder.save()
+
 
 
   /*
@@ -215,7 +225,14 @@ export function handleAtomicMatch_(call: AtomicMatch_Call): void {
   sellOrder.week = week.id
   sellOrder.transaction = transaction.id
   sellOrder.block = blockId
+  sellOrder.matchedOrder = buyOrder.id
   sellOrder.save()
+
+  buyOrder.matchedOrder = sellOrder.id
+  buyOrder.save()
+
+
+  // TODO calc amounts
 
   // // sellMaker === buyTaker
   let sellerAmount = shared.helpers.calcOrderAmount(
@@ -223,24 +240,41 @@ export function handleAtomicMatch_(call: AtomicMatch_Call): void {
     buyOrder.takerProtocolFee!,
     buyOrder.takerRelayerFee!
   )
-  let sellerBalance = balances.increaseBalanceAmount(
-    seller.id,
-    paymentToken.id,
-    sellerAmount
-  )
-  sellerBalance.save()
 
   let buyerAmount = shared.helpers.calcOrderAmount(
     buyOrder.basePrice!,
     buyOrder.makerProtocolFee!,
     buyOrder.makerRelayerFee!
   )
-  let makerBalance = balances.decreaseBalanceAmount(
-    buyer.id,
-    paymentToken.id,
-    buyerAmount
-  )
-  makerBalance.save()
+
+  let saleTarget = call.inputs.addrs[11]
+  let isBundleSale = saleTarget.toHexString() === orders.constants.WYVERN_ATOMICIZER_ADDRESS
+
+  if (isBundleSale) {
+    let decoded = abi.decodeBatchNftData(
+      buyOrder.callData!, sellOrder.callData!, buyOrder.replacementPattern!
+    );
+
+
+    for (let i = 0; i < decoded.transfers.length; i++) {
+
+      mappingHelpers.handleSale(
+        decoded.transfers[i], transaction.id, asset.address!, paymentToken.id, sellerAmount, timestamp
+      )
+    }
+
+  } else {
+    let decoded = abi.decodeSingleNftData(
+      buyOrder.callData!, sellOrder.callData!, buyOrder.replacementPattern!
+    );
+    mappingHelpers.handleSale(
+      decoded, transaction.id, asset.address!, paymentToken.id, sellerAmount, timestamp
+    )
+
+  }
+
+
+
 
   // TODO nft token change owner
 
@@ -256,13 +290,7 @@ export function handleAtomicMatch_(call: AtomicMatch_Call): void {
   let weekVolume = volumes.week.increaseVolume(asset.id, paymentToken.id, week.id, weekEpoch, sellerAmount)
   weekVolume.save()
 
-  let erc20tx = events.getOrCreateErc20Transaction(
-    timestamp,
-    paymentToken.id,
-    buyer.id,
-    seller.id,
-    sellerAmount
-  )
+
   erc20tx.order = buyOrder.id
   erc20tx.minute = minute.id
   erc20tx.hour = hour.id
@@ -276,3 +304,5 @@ export function handleAtomicMatch_(call: AtomicMatch_Call): void {
   erc20tx.weekVolume = weekVolume.id
   erc20tx.save()
 }
+
+
