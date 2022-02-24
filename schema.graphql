@@ -4,12 +4,6 @@ type Sale @entity {
   "internal id used for indexation"
   id: ID!
 
-  contract: Asset
-
-  nft: Nft
-
-  token: Token
-
   # derived relationships
 
   "Nft transfers made for this sell"
@@ -21,7 +15,7 @@ type Sale @entity {
   "Orders that made this Sale, must be a 2 entries array, one Buy Order and one Sell Order"
   orders: [Order!]! @derivedFrom(field: "sale")
 
-   # time series relationships
+  # time series relationships
 
   "related minute entity"
   minute: Minute

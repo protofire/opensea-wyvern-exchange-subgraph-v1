@@ -50,6 +50,11 @@ export namespace mappingHelpers {
 		paymentAmount: BigInt, timestamp: BigInt
 	): void {
 
+		let sale = sales.getOrCreateSale(
+			timestamp.toString()
+		)
+		sale.save()
+
 		for (let i = 0; i < decoded.transfers.length; i++) {
 			let from = decoded.transfers[i].from
 			let to = decoded.transfers[i].to
@@ -64,42 +69,20 @@ export namespace mappingHelpers {
 			seller.lastUpdatedAt = transactionId
 			seller.save()
 
-
 			let contract = assets.getOrCreateAsset(contractAddress)
 			contract.save()
 
-			let nft = nfts.changeNftOwner(nftId, contract.id, buyer.id)
-			nft.save()
+			handleNftTransfer(
+				contract.address!, seller.id, buyer.id, nftId, paymentTokenId,
+				paymentAmount, timestamp, transactionId, sale.id
+			)
+
+			handleErc20Transfer(
+				seller.id, buyer.id, paymentTokenId,
+				paymentAmount, sale.id, timestamp,
+			)
+
 		}
-
-		let from = decoded.from
-		let to = decoded.to
-		let tokenId = decoded.token
-
-		let buyer = accounts.getOrCreateAccount(to, transactionId)
-		buyer.lastUpdatedAt = transactionId
-		buyer.save()
-
-		let seller = accounts.getOrCreateAccount(from, transactionId)
-		seller.lastUpdatedAt = transactionId
-		seller.save()
-
-		let contract = assets.getOrCreateAsset(contractAddress)
-		contract.save()
-
-		let nft = nfts.changeNftOwner(tokenId, contract.id, buyer.id)
-		nft.save()
-
-		let sale = sales.getOrCreateSale(
-			contract.id, nft.id, paymentTokenId, timestamp.toString()
-		)
-		sale.save()
-
-		let nftTransaction = nfts.getOrCreateNftTransfer(
-			nft.id, timestamp, seller.id, buyer.id, sale.id
-		)
-		nftTransaction.save()
-
 	}
 
 	function handleNftTransfer(
