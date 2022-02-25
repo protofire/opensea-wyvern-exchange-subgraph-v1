@@ -40,13 +40,13 @@ dataSources:
       callHandlers:
         - function: atomicMatch_(address[14],uint256[18],uint8[8],bytes,bytes,bytes,bytes,bytes,bytes,uint8[2],bytes32[5])
           handler: handleAtomicMatch_
-      eventHandlers:
-        # - event: OrderApprovedPartOne(indexed bytes32,address,indexed address,address,uint256,uint256,uint256,uint256,indexed address,uint8,uint8,uint8,address)
-        #   handler: handleOrderApprovedPartOne
-        # - event: OrderApprovedPartTwo(indexed bytes32,uint8,bytes,bytes,address,bytes,address,uint256,uint256,uint256,uint256,uint256,bool)
-        #   handler: handleOrderApprovedPartTwo
-        - event: OrderCancelled(indexed bytes32)
-          handler: handleOrderCancelled
-        # - event: OrdersMatched(bytes32,bytes32,indexed address,indexed address,uint256,indexed bytes32)
-        #   handler: handleOrdersMatched
+      # eventHandlers:
+      # - event: OrderApprovedPartOne(indexed bytes32,address,indexed address,address,uint256,uint256,uint256,uint256,indexed address,uint8,uint8,uint8,address)
+      #   handler: handleOrderApprovedPartOne
+      # - event: OrderApprovedPartTwo(indexed bytes32,uint8,bytes,bytes,address,bytes,address,uint256,uint256,uint256,uint256,uint256,bool)
+      #   handler: handleOrderApprovedPartTwo
+      # - event: OrderCancelled(indexed bytes32)
+      #   handler: handleOrderCancelled
+      # - event: OrdersMatched(bytes32,bytes32,indexed address,indexed address,uint256,indexed bytes32)
+      #   handler: handleOrdersMatched
       file: ./src/mapping.ts
