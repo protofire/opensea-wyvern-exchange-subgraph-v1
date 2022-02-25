@@ -119,7 +119,7 @@ export function handleAtomicMatch_(call: AtomicMatch_Call): void {
     call.inputs.feeMethodsSidesKindsHowToCalls[0],
     call.inputs.feeMethodsSidesKindsHowToCalls[1],
     call.inputs.feeMethodsSidesKindsHowToCalls[2],
-    call.inputs.addrs[4], call.inputs.feeMethodsSidesKindsHowToCalls[3],
+    call.inputs.addrs[4].toHexString(), call.inputs.feeMethodsSidesKindsHowToCalls[3],
     call.inputs.calldataBuy, call.inputs.replacementPatternBuy,
     call.inputs.addrs[5], call.inputs.staticExtradataBuy,
     paymentToken.id, call.inputs.uints[4], call.inputs.uints[5],
@@ -152,7 +152,7 @@ export function handleAtomicMatch_(call: AtomicMatch_Call): void {
     call.inputs.feeMethodsSidesKindsHowToCalls[4],
     call.inputs.feeMethodsSidesKindsHowToCalls[5],
     call.inputs.feeMethodsSidesKindsHowToCalls[6],
-    call.inputs.addrs[11], call.inputs.feeMethodsSidesKindsHowToCalls[7],
+    call.inputs.addrs[11].toHexString(), call.inputs.feeMethodsSidesKindsHowToCalls[7],
     call.inputs.calldataSell, call.inputs.replacementPatternSell,
     call.inputs.addrs[12], call.inputs.staticExtradataSell,
     paymentToken.id, call.inputs.uints[13], call.inputs.uints[14],
@@ -194,7 +194,8 @@ export function handleAtomicMatch_(call: AtomicMatch_Call): void {
     );
 
     mappingHelpers.handleBundleSale(
-      decoded, metadataResult.txId, paymentToken.id, sellerAmount, timestamp
+      decoded, metadataResult.txId, paymentToken.id,
+      sellerAmount, timestamp, timeSeriesResult
     )
 
 
@@ -203,7 +204,8 @@ export function handleAtomicMatch_(call: AtomicMatch_Call): void {
       buyOrder.callData!, sellOrder.callData!, buyOrder.replacementPattern!
     );
     mappingHelpers.handleSingleSale(
-      decoded, metadataResult.txId, call.inputs.addrs[11], paymentToken.id, sellerAmount, timestamp
+      decoded, metadataResult.txId, call.inputs.addrs[11],
+      paymentToken.id, sellerAmount, timestamp, timeSeriesResult
     )
 
   }

@@ -174,7 +174,7 @@ export namespace orders {
 		feeMethod: i32,
 		side: i32,
 		saleKind: i32,
-		target: Address,
+		target: string,
 		howToCall: i32,
 		callData: Bytes,
 		replacementPattern: Bytes,
