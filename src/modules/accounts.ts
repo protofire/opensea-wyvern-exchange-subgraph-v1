@@ -1,5 +1,5 @@
 import { Bytes } from "@graphprotocol/graph-ts"
-import { Account } from "../../../generated/schema"
+import { Account } from "../../generated/schema"
 
 export namespace accounts {
 
@@ -12,6 +12,7 @@ export namespace accounts {
 			entity.createdAt = txId
 			entity.lastUpdatedAt = txId
 		}
+		entity.lastUpdatedAt = txId
 		return entity as Account
 	}
 }

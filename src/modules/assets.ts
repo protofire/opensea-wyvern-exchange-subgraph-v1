@@ -1,5 +1,5 @@
 import { Bytes } from "@graphprotocol/graph-ts"
-import { Asset } from "../../../generated/schema"
+import { Asset } from "../../generated/schema"
 
 export namespace assets {
 	export function loadAsset(id: string): Asset {

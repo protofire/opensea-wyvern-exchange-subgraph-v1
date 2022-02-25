@@ -1,5 +1,5 @@
 import { BigInt } from "@graphprotocol/graph-ts";
-import { Day, Hour, Minute, Week } from "../../../generated/schema";
+import { Day, Hour, Minute, Week } from "../../generated/schema";
 
 export namespace timeSeries {
 	export namespace minutes {

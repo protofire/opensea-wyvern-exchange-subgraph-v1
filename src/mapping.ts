@@ -1,18 +1,21 @@
-import { log } from "@graphprotocol/graph-ts"
+import { BigInt, log } from "@graphprotocol/graph-ts"
 import {
-  OrderApprovedPartOne,
-  OrderApprovedPartTwo,
+  AtomicMatch_Call,
   OrderCancelled,
   OrdersMatched
 } from "../generated/openseaWyvernExchange/openseaWyvernExchange"
+import { Order } from "../generated/schema"
+import { mappingHelpers } from "./mappingHelpers"
 
 import {
+  abi,
   accounts,
   assetOwners,
   assets,
   balances,
   blocks,
   events,
+  nfts,
   orders,
   shared,
   timeSeries,
@@ -23,95 +26,6 @@ import {
 
 // TODO: add event handlers
 
-export function handleOrderApprovedPartOne(event: OrderApprovedPartOne): void {
-  let order = orders.getOrCreateOrder(event.params.hash.toHex())
-
-  // 	shared.helpers.handleEvmMetadata(event)
-  //  won't be used as block and tx are needed in scope
-
-
-
-  let timestamp = event.block.timestamp
-  // TODO handle minute and so on
-  let minuteEpoch = shared.date.truncateMinutes(timestamp)
-  let minute = timeSeries.minutes.getOrCreateMinute(minuteEpoch)
-  minute.save()
-  order.minute = minute.id
-
-  let hourEpoch = shared.date.truncateHours(timestamp)
-  let hour = timeSeries.hours.getOrCreateHour(hourEpoch)
-  hour.save()
-  order.hour = hour.id
-
-  let dayEpoch = shared.date.truncateDays(timestamp)
-  let day = timeSeries.days.getOrCreateDay(dayEpoch)
-  day.save()
-  order.day = day.id
-
-  let weekEpoch = shared.date.truncateWeeks(timestamp)
-  let week = timeSeries.weeks.getOrCreateWeek(weekEpoch)
-  week.save()
-  order.week = week.id
-
-  let blockId = event.block.number.toString()
-  let txHash = event.transaction.hash
-
-  // TODO relate transactions to time series
-  let transaction = transactions.getOrCreateTransactionMeta(
-    blockId,
-    txHash,
-    event.transaction.from,
-    event.transaction.gasPrice,
-  )
-  transaction.minute = minute.id
-  transaction.hour = hour.id
-  transaction.day = day.id
-  transaction.week = week.id
-  transaction.save()
-  order.transaction = transaction.id
-
-  let block = blocks.services.getOrCreateBlock(blockId, event.block.timestamp, event.block.number)
-  block.minute = minute.id
-  block.hour = hour.id
-  block.day = day.id
-  block.week = week.id
-  block.save()
-  order.block = blockId
-
-  let maker = accounts.getOrCreateAccount(event.params.maker, transaction.id)
-  maker.lastUpdatedAt = transaction.id
-  maker.save()
-  order.maker = maker.id
-
-  let taker = accounts.getOrCreateAccount(event.params.taker, transaction.id)
-  taker.lastUpdatedAt = transaction.id
-  taker.save()
-  order.taker = taker.id
-
-  // TODO relate assets to time series
-  let asset = assets.getOrCreateAsset(event.params.target)
-  asset.save()
-
-  order = orders.handleOrderPartOne(
-    event.params,
-    order,
-    asset.id
-  )
-  order.save()
-
-}
-
-export function handleOrderApprovedPartTwo(event: OrderApprovedPartTwo): void {
-  shared.helpers.handleEvmMetadata(event)
-  // TODO event entity
-
-  let token = tokens.getOrCreateToken(event.params.paymentToken)
-  token.save()
-
-  let order = orders.getOrCreateOrder(event.params.hash.toHex())
-  order = orders.handleOrderPartTwo(event.params, order, token.id)
-  order.save()
-}
 
 export function handleOrderCancelled(event: OrderCancelled): void {
   shared.helpers.handleEvmMetadata(event)
@@ -120,9 +34,99 @@ export function handleOrderCancelled(event: OrderCancelled): void {
   order.save()
 }
 
-export function handleOrdersMatched(event: OrdersMatched): void {
-  let timestamp = event.block.timestamp
-  // TODO: refactor in mapping helpers
+
+// export function handleOrdersMatched(event: OrdersMatched): void {
+//   let sellOrder = Order.load(event.params.sellHash.toHex())
+//   let buyOrder = Order.load(event.params.buyHash.toHex())
+//   let order = sellOrder || buyOrder
+
+//   if (!order) {
+//     log.warning("handleOrdersMatched :: missing sell and buy ABORTING", [])
+//     return
+//   }
+
+//   log.info(
+//     "handleOrdersMatched :: [sell is {}] [buy is {}]",
+//     [sellOrder ? sellOrder.id : "missing", buyOrder ? buyOrder.id : "missing"]
+//   )
+
+//   order = orders.mutations.setAsFilled(order)
+
+//   if (buyOrder && sellOrder) {
+//     let sellCallData = sellOrder.callData!
+//     let buyCallData = buyOrder.callData!
+//     log.info("handleOrdersMatched :: both buy and sell are present", [])
+//     log.warning("call data are: [sell: {}][buy: {}]", [sellCallData.toHexString(), buyCallData.toHexString()])
+
+//   }
+
+// }
+
+/*
+ params
+  address[14] addrs,
+  uint[18] uints,
+  uint8[8] feeMethodsSidesKindsHowToCalls,
+  bytes calldataBuy,
+  bytes calldataSell,
+  bytes replacementPatternBuy,
+  bytes replacementPatternSell,
+  bytes staticExtradataBuy,
+  bytes staticExtradataSell,
+  uint8[2] vs,
+  bytes32[5] rssMetadata
+*/
+
+/*
+handleAtomicMatch_ :: maker/taker mismatch 
+(maker[buy 0xe78d1efd02e41d8defd2e1ac29dca8291f67bfbc][sell 0x1bf8ba061664339baf1e1d016d8f6cea9455f404]) 
+(taker[buy 0x1bf8ba061664339baf1e1d016d8f6cea9455f404][sell 0x0000000000000000000000000000000000000000]),
+*/
+export function handleAtomicMatch_(call: AtomicMatch_Call): void {
+
+  let blockId = call.block.number.toString()
+  let transaction = transactions.getOrCreateTransactionMeta(
+    blockId,
+    call.transaction.hash,
+    call.transaction.from,
+    call.transaction.gasPrice,
+  )
+
+  // buyMaker === someoneElse
+  // sellMaker === buyTaker
+  // sellTaker === Address.zero
+
+  let buyMakerAddress = call.inputs.addrs[1]
+  let sellMakerAddress = call.inputs.addrs[8]
+  let buyTakerAddress = call.inputs.addrs[2]
+  let sellTakerAddress = call.inputs.addrs[9]
+
+
+
+  //TODO relate filled orders
+  //TODO handle bundle sales
+  //TODO get asset token ids
+  //TODO add counters
+
+
+  // buyMaker
+  let buyer = accounts.getOrCreateAccount(buyMakerAddress, transaction.id)
+  buyer.save()
+
+  let seller = accounts.getOrCreateAccount(sellMakerAddress || buyTakerAddress, transaction.id)
+  seller.save()
+
+  let sellTaker = accounts.getOrCreateAccount(sellTakerAddress, transaction.id)
+  sellTaker.save()
+
+
+  let paymentToken = tokens.getOrCreateToken(call.inputs.addrs[6])
+  paymentToken.save()
+
+  // TIME SERIES
+
+  let timestamp = call.block.timestamp
+
   let minuteEpoch = shared.date.truncateMinutes(timestamp)
   let minute = timeSeries.minutes.getOrCreateMinute(minuteEpoch)
   minute.save()
@@ -139,73 +143,143 @@ export function handleOrdersMatched(event: OrdersMatched): void {
   let week = timeSeries.weeks.getOrCreateWeek(weekEpoch)
   week.save()
 
-  let blockId = event.block.number.toString()
-  let txHash = event.transaction.hash
-  let transaction = transactions.getOrCreateTransactionMeta(
-    blockId,
-    txHash,
-    event.transaction.from,
-    event.transaction.gasPrice,
-  )
   transaction.minute = minute.id
   transaction.hour = hour.id
   transaction.day = day.id
   transaction.week = week.id
   transaction.save()
 
-  shared.helpers.handleEvmMetadata(event)
+  let block = blocks.services.getOrCreateBlock(blockId, call.block.timestamp, call.block.number)
+  block.minute = minute.id
+  block.hour = hour.id
+  block.day = day.id
+  block.week = week.id
+  block.save()
 
-  let maker = accounts.getOrCreateAccount(event.params.maker, transaction.id)
-  maker.save()
+  /*
+  Order(addrs[0], addrs[1], addrs[2], uints[0], uints[1], uints[2], uints[3], addrs[3], 
+    FeeMethod(feeMethodsSidesKindsHowToCalls[0]), SaleKindInterface.Side(feeMethodsSidesKindsHowToCalls[1]),
+    SaleKindInterface.SaleKind(feeMethodsSidesKindsHowToCalls[2]), addrs[4], 
+    AuthenticatedProxy.HowToCall(feeMethodsSidesKindsHowToCalls[3]), 
+    calldataBuy, replacementPatternBuy, addrs[5], staticExtradataBuy, 
+    ERC20(addrs[6]), uints[4], uints[5], uints[6], uints[7], uints[8]),
+  
+  */
 
-  let owner = accounts.getOrCreateAccount(event.params.taker, transaction.id)
-  owner.save()
+  let buyOrder = orders.handleOrder(
+    call.inputs.addrs[0], buyer.id, seller.id,
+    call.inputs.uints[0], call.inputs.uints[1],
+    call.inputs.uints[2], call.inputs.uints[3], call.inputs.addrs[3],
+    call.inputs.feeMethodsSidesKindsHowToCalls[0],
+    call.inputs.feeMethodsSidesKindsHowToCalls[1],
+    call.inputs.feeMethodsSidesKindsHowToCalls[2],
+    call.inputs.addrs[4].toHexString(), call.inputs.feeMethodsSidesKindsHowToCalls[3],
+    call.inputs.calldataBuy, call.inputs.replacementPatternBuy,
+    call.inputs.addrs[5], call.inputs.staticExtradataBuy,
+    paymentToken.id, call.inputs.uints[4], call.inputs.uints[5],
+    call.inputs.uints[6], call.inputs.uints[7], call.inputs.uints[8]
+  )
+  buyOrder.minute = minute.id
+  buyOrder.hour = hour.id
+  buyOrder.day = day.id
+  buyOrder.week = week.id
+  buyOrder.transaction = transaction.id
+  buyOrder.block = blockId
 
-  let sellOrderId = event.params.sellHash.toHex()
-  let order = orders.getOrCreateOrder(sellOrderId)
-  if (order.target == null) {
-    log.warning("missing target for order: {}", [sellOrderId])
-    // TODO: err entity
-    return
+
+
+  /*
+  Order(addrs[7], addrs[8], addrs[9], uints[9], uints[10], uints[11], uints[12], addrs[10],
+    FeeMethod(feeMethodsSidesKindsHowToCalls[4]), SaleKindInterface.Side(feeMethodsSidesKindsHowToCalls[5]), 
+    SaleKindInterface.SaleKind(feeMethodsSidesKindsHowToCalls[6]), addrs[11], 
+    AuthenticatedProxy.HowToCall(feeMethodsSidesKindsHowToCalls[7]), 
+    calldataSell, replacementPatternSell, addrs[12], staticExtradataSell,
+    ERC20(addrs[13]), uints[13], uints[14], uints[15], uints[16], uints[17])
+  */
+
+  let sellOrder = orders.handleOrder(
+    call.inputs.addrs[7], seller.id, sellTaker.id,
+    call.inputs.uints[9], call.inputs.uints[10],
+    call.inputs.uints[11], call.inputs.uints[12], call.inputs.addrs[10],
+    call.inputs.feeMethodsSidesKindsHowToCalls[4],
+    call.inputs.feeMethodsSidesKindsHowToCalls[5],
+    call.inputs.feeMethodsSidesKindsHowToCalls[6],
+    call.inputs.addrs[11].toHexString(), call.inputs.feeMethodsSidesKindsHowToCalls[7],
+    call.inputs.calldataSell, call.inputs.replacementPatternSell,
+    call.inputs.addrs[12], call.inputs.staticExtradataSell,
+    paymentToken.id, call.inputs.uints[13], call.inputs.uints[14],
+    call.inputs.uints[15], call.inputs.uints[16], call.inputs.uints[17]
+  )
+  sellOrder.minute = minute.id
+  sellOrder.hour = hour.id
+  sellOrder.day = day.id
+  sellOrder.week = week.id
+  sellOrder.transaction = transaction.id
+  sellOrder.block = blockId
+  sellOrder.matchedOrder = buyOrder.id
+  sellOrder.save()
+
+  buyOrder.matchedOrder = sellOrder.id
+  buyOrder.save()
+
+
+  // TODO calc amounts
+
+  // // sellMaker === buyTaker
+  let sellerAmount = shared.helpers.calcOrderAmount(
+    buyOrder.basePrice!,
+    buyOrder.takerProtocolFee!,
+    buyOrder.takerRelayerFee!
+  )
+
+  let buyerAmount = shared.helpers.calcOrderAmount(
+    buyOrder.basePrice!,
+    buyOrder.makerProtocolFee!,
+    buyOrder.makerRelayerFee!
+  )
+
+  let saleTarget = call.inputs.addrs[11]
+  let isBundleSale = saleTarget.toHexString() === orders.constants.WYVERN_ATOMICIZER_ADDRESS
+
+  if (isBundleSale) {
+    let decoded = abi.decodeBatchNftData(
+      buyOrder.callData!, sellOrder.callData!, buyOrder.replacementPattern!
+    );
+
+    mappingHelpers.handleBundleSale(
+      decoded, transaction.id, paymentToken.id, sellerAmount, timestamp
+    )
+
+
+  } else {
+    let decoded = abi.decodeSingleNftData(
+      buyOrder.callData!, sellOrder.callData!, buyOrder.replacementPattern!
+    );
+    mappingHelpers.handleSingleSale(
+      decoded, transaction.id, call.inputs.addrs[11], paymentToken.id, sellerAmount, timestamp
+    )
+
   }
-  let asset = assets.loadAsset(order.target)
-  if (asset == null) {
-    log.warning("missing asset for target: {}", [order.target])
-    return
-  }
-
-  let assetOwner = assetOwners.getOrCreateAssetOwner(owner.id, asset.id)
-  assetOwner.save()
 
 
-  let totalTakerAmount = shared.helpers.calcTotalTakerAmount(order)
-  let takerBalance = balances.increaseBalanceAmount(order.taker, order.paymentToken, totalTakerAmount)
-  takerBalance.save()
 
-  let totalMakerAmount = shared.helpers.calcTotalMakerAmount(order)
-  let makerBalance = balances.decreaseBalanceAmount(order.maker, order.paymentToken, totalMakerAmount)
-  makerBalance.save()
 
-  let minuteVolume = volumes.minute.increaseVolume(asset.id, order.paymentToken, minute.id, minuteEpoch, totalTakerAmount)
+  // TODO nft token change owner
+
+  let minuteVolume = volumes.minute.increaseVolume(asset.id, paymentToken.id, minute.id, minuteEpoch, sellerAmount)
   minuteVolume.save()
 
-  let hourVolume = volumes.hour.increaseVolume(asset.id, order.paymentToken, hour.id, hourEpoch, totalTakerAmount)
+  let hourVolume = volumes.hour.increaseVolume(asset.id, paymentToken.id, hour.id, hourEpoch, sellerAmount)
   hourVolume.save()
 
-  let dayVolume = volumes.day.increaseVolume(asset.id, order.paymentToken, day.id, dayEpoch, totalTakerAmount)
+  let dayVolume = volumes.day.increaseVolume(asset.id, paymentToken.id, day.id, dayEpoch, sellerAmount)
   dayVolume.save()
 
-  let weekVolume = volumes.week.increaseVolume(asset.id, order.paymentToken, week.id, weekEpoch, totalTakerAmount)
+  let weekVolume = volumes.week.increaseVolume(asset.id, paymentToken.id, week.id, weekEpoch, sellerAmount)
   weekVolume.save()
 
-  let erc20tx = events.getOrCreateErc20Transaction(
-    timestamp,
-    order.paymentToken,
-    maker.id,
-    owner.id,
-    totalTakerAmount
-  )
-  erc20tx.order = order.id
+
+  erc20tx.order = buyOrder.id
   erc20tx.minute = minute.id
   erc20tx.hour = hour.id
   erc20tx.day = day.id
@@ -217,11 +291,6 @@ export function handleOrdersMatched(event: OrdersMatched): void {
   erc20tx.dayVolume = dayVolume.id
   erc20tx.weekVolume = weekVolume.id
   erc20tx.save()
-
-  order.minuteVolume = minuteVolume.id
-  order.hourVolume = hourVolume.id
-  order.dayVolume = dayVolume.id
-  order.weekVolume = weekVolume.id
-  order.save()
-
 }
+
+

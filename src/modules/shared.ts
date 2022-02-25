@@ -1,8 +1,7 @@
-import { BigInt, log, TypedMap } from '@graphprotocol/graph-ts'
+import { BigInt, Bytes, log, TypedMap } from '@graphprotocol/graph-ts'
 import { ethereum } from "@graphprotocol/graph-ts";
-import { integer } from '@protofire/subgraph-toolkit';
-import { Order } from '../../../generated/schema';
-import { blocks, transactions } from "../index";
+import { bytes, integer } from '@protofire/subgraph-toolkit';
+import { blocks, transactions } from "./";
 
 export let SECONDS_IN_MINUTE = 60 * 60
 export let SECONDS_IN_HOUR = SECONDS_IN_MINUTE * 60
@@ -11,21 +10,28 @@ export let SECONDS_IN_WEEK = SECONDS_IN_DAY * 7
 export namespace shared {
 	export namespace helpers {
 
+		export function hexToBytes(str: string): Bytes {
+			return Bytes.fromByteArray(Bytes.fromHexString(str))
+		}
+
+		export function hexToBigInt(str: string): BigInt {
+			return bytes.toSignedInt(hexToBytes(str))
+		}
+
 		export function getPropById(key: string, map: TypedMap<string, string>): string {
 			let val = map.get(key) as string | null
-			log.info('@@@ getPropById ::: {} : {} ', [
-				"Finding prop for key", key
-			])
-			if (val == null) {
+			// log.info('@@@ getPropById ::: {} : {} ', [
+			// "Finding prop for key", key
+			// ])
+			if (!val) {
 				log.info('@@@ getPropById ::: {} : {} ', [
 					"Cannot find prop for key", key
 				])
 				log.warning('@@@ getPropById ::: {} : {} ', [
 					"Cannot find prop for key", key
 				])
-				return ""
 			}
-			return val
+			return val ? val : ""
 		}
 
 		export function handleEvmMetadata(event: ethereum.Event): void {
@@ -36,7 +42,6 @@ export namespace shared {
 			block.save()
 
 			let transaction = transactions.getOrCreateTransactionMeta(
-				txHash.toHexString(),
 				blockId,
 				txHash,
 				event.transaction.from,
@@ -57,25 +62,24 @@ export namespace shared {
 		}
 
 		export function getSafeNumber(val: BigInt | null): BigInt {
-			let number = val
-			if (number == null) {
-				number = integer.ZERO
+			if (!val) {
+				log.warning("getSafeNumber :: input was null", [])
 			}
-			return number as BigInt
+			return val ? val : integer.ZERO
+
 		}
 
-		export function calcTotalTakerAmount(order: Order): BigInt {
-			let basePrice = getSafeNumber(order.basePrice)
-			let takerProtocolFee = getSafeNumber(order.takerProtocolFee)
-			let takerRelayerFee = getSafeNumber(order.takerProtocolFee)
+		export function calcOrderAmount(
+			_basePrice: BigInt,
+			_protocolFee: BigInt,
+			_relayerFee: BigInt,
+		): BigInt {
+			let basePrice = getSafeNumber(_basePrice)
+			let takerProtocolFee = getSafeNumber(_protocolFee)
+			let takerRelayerFee = getSafeNumber(_relayerFee)
 			return basePrice.minus(takerRelayerFee).minus(takerProtocolFee)
 		}
-		export function calcTotalMakerAmount(order: Order): BigInt {
-			let basePrice = getSafeNumber(order.basePrice)
-			let makerProtocolFee = getSafeNumber(order.makerProtocolFee)
-			let makerRelayerFee = getSafeNumber(order.makerRelayerFee)
-			return basePrice.minus(makerRelayerFee).minus(makerProtocolFee)
-		}
+
 	}
 	export namespace date {
 		export let ONE_MINUTE = BigInt.fromI32(SECONDS_IN_MINUTE)

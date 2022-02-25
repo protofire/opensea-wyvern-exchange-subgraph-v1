@@ -1,5 +1,5 @@
 import { BigInt, Bytes } from "@graphprotocol/graph-ts";
-import { Transaction } from "../../../generated/schema";
+import { Transaction } from "../../generated/schema";
 
 
 export namespace transactions {
@@ -8,9 +8,9 @@ export namespace transactions {
 		from: Bytes, gasPrice: BigInt
 	): Transaction {
 		let txId = hash.toHex()
-		let meta = Transaction.load(id)
+		let meta = Transaction.load(txId)
 		if (meta == null) {
-			meta = new Transaction(id)
+			meta = new Transaction(txId)
 			meta.block = blockId
 			meta.hash = hash
 			meta.from = from
