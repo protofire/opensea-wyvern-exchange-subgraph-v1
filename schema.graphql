@@ -83,20 +83,24 @@ type Balance @entity {
 
   # stored values
 
-  "balance's owner"
-  account: Account!
-
   "token's amount"
   amount: BigInt!
 
   # stored relationships
+
+  "balance's owner"
+  account: Account!
 
   "related token"
   token: Erc20Token!
 
   # derived relationships
 
-  erc20Transactions: [Erc20Transaction!]! @derivedFrom(field: "balance")
+  "erc20Transactions that increased this balance"
+  increasingTransactions: [Erc20Transaction!]! @derivedFrom(field: "increasedBalance")
+
+  "erc20Transactions that decreased this balance"
+  decreasingTransactions: [Erc20Transaction!]! @derivedFrom(field: "decreasedBalance")
 }
 
 # "an Erc20Token as payment token for a sale"
@@ -163,8 +167,11 @@ type Erc20Transaction @entity{
   "related token"
   token: Erc20Token!
 
-  "a related balance entity"
-  balance: Balance!
+  "Balance entity that increased it funds"
+  increasedBalance: Balance!
+
+  "Balance entity that decreaced it funds"
+  decreasedBalance: Balance!
 
   "related sale"
   sale: Sale!
