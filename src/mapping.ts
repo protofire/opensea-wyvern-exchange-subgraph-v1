@@ -17,12 +17,12 @@ import {
 // TODO: add event handlers
 
 
-export function handleOrderCancelled(event: OrderCancelled): void {
-  shared.helpers.handleEvmMetadata(event)
-  // TODO event entity
-  let order = orders.cancelOrder(event.params.hash.toHex())
-  order.save()
-}
+// export function handleOrderCancelled(event: OrderCancelled): void {
+//   shared.helpers.handleEvmMetadata(event)
+//   // TODO event entity
+//   let order = orders.cancelOrder(event.params.hash.toHex())
+//   order.save()
+// }
 
 
 // export function handleOrdersMatched(event: OrdersMatched): void {
@@ -67,7 +67,7 @@ export function handleOrderCancelled(event: OrderCancelled): void {
   bytes32[5] rssMetadata
 */
 
-/
+
 export function handleAtomicMatch_(call: AtomicMatch_Call): void {
   let timestamp = call.block.timestamp
   let timeSeriesResult = timeSeries.handleTimeSeries(timestamp)
@@ -195,7 +195,7 @@ export function handleAtomicMatch_(call: AtomicMatch_Call): void {
 
     mappingHelpers.handleBundleSale(
       decoded, metadataResult.txId, paymentToken.id,
-      sellerAmount, timestamp, timeSeriesResult
+      sellerAmount, timestamp, timeSeriesResult, metadataResult
     )
 
 
@@ -205,7 +205,8 @@ export function handleAtomicMatch_(call: AtomicMatch_Call): void {
     );
     mappingHelpers.handleSingleSale(
       decoded, metadataResult.txId, call.inputs.addrs[11],
-      paymentToken.id, sellerAmount, timestamp, timeSeriesResult
+      paymentToken.id, sellerAmount, timestamp, timeSeriesResult,
+      metadataResult
     )
 
   }

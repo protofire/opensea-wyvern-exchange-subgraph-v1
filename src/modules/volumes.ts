@@ -23,8 +23,8 @@ export namespace volumes {
 	}
 
 	export function handleErc20Volumes(
-		nftContractId: string, paymentTokenId: string,
-		erc20Amount: BigInt, timeSeriesResult: timeSeries.HandleTimeSeriesResult
+		paymentTokenId: string, erc20Amount: BigInt,
+		timeSeriesResult: timeSeries.HandleTimeSeriesResult
 	): VolumesResult {
 
 		let minuteVolume = volumes.minute.increaseVolume(
@@ -58,8 +58,7 @@ export namespace volumes {
 
 	}
 	export function handleNftVolumes(
-		nftContractId: string, paymentTokenId: string,
-		timeSeriesResult: timeSeries.HandleTimeSeriesResult
+		nftContractId: string, timeSeriesResult: timeSeries.HandleTimeSeriesResult
 	): VolumesResult {
 
 		let minuteVolume = volumes.minute.increaseVolume(
@@ -196,7 +195,7 @@ export namespace volumes {
 	export namespace helpers {
 		export function getVolumeId(
 			prefix: string, contractId: string, epoch: string
-		) {
+		): string {
 			return `${prefix}-${contractId}-${epoch}`
 		}
 	}

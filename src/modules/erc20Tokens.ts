@@ -22,7 +22,7 @@ export namespace erc20Tokens {
 			entity.timestamp = timestamp
 			entity.from = from
 			entity.to = to
-			entity.token = tokenId
+			entity.contract = tokenId
 			entity.amount = amount
 			entity.sale = sale
 		}
