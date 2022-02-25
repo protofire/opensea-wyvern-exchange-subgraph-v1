@@ -1,7 +1,7 @@
 import { BigInt, Bytes, log, TypedMap } from '@graphprotocol/graph-ts'
-import { ethereum } from "@graphprotocol/graph-ts";
+// import { ethereum } from "@graphprotocol/graph-ts";
 import { bytes, integer } from '@protofire/subgraph-toolkit';
-import { blocks, transactions } from "./";
+// import { metadata } from './metadata';
 
 export let SECONDS_IN_MINUTE = 60 * 60
 export let SECONDS_IN_HOUR = SECONDS_IN_MINUTE * 60
@@ -34,21 +34,22 @@ export namespace shared {
 			return val ? val : ""
 		}
 
-		export function handleEvmMetadata(event: ethereum.Event): void {
-			let blockId = event.block.number.toString()
-			let txHash = event.transaction.hash
+		// export function handleEvmMetadata(event: ethereum.Event): void {
+		// 	let blockId = event.block.number.toString()
+		// 	let txHash = event.transaction.hash
 
-			let block = blocks.services.getOrCreateBlock(blockId, event.block.timestamp, event.block.number)
-			block.save()
+		// 	let block = metadata.blocks.getOrCreateBlock(event.block.timestamp, event.block.number)
+		// 	block.save()
 
-			let transaction = transactions.getOrCreateTransactionMeta(
-				blockId,
-				txHash,
-				event.transaction.from,
-				event.transaction.gasPrice,
-			)
-			transaction.save()
-		}
+		// 	let transaction = metadata.transactions.getOrCreateTransactionMeta(
+		// 		blockId,
+		// 		txHash,
+		// 		event.transaction.from,
+		// 		event.transaction.gasPrice,
+		// 	)
+		// 	transaction.save()
+		// }
+
 		export function i32ToString(int32: i32): string {
 			let val = BigInt.fromI32(int32).toString()
 			// log.info("@@@@@@  i32 to hex: " + hex, [])

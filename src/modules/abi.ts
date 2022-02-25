@@ -193,7 +193,6 @@ export namespace abi {
 
 	}
 
-	// TODO: return a typed map
 	export function decodeSingleNftData(
 		buyCallData: Bytes, sellCallData: Bytes, replacementPattern: Bytes
 	): Decoded_TransferFrom_Result {

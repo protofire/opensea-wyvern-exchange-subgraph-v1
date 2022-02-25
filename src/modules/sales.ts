@@ -6,11 +6,14 @@ export namespace sales {
 			return `sale-${timestamp}`
 		}
 	}
-	export function getOrCreateSale(timestamp: string): Sale {
+	export function getOrCreateSale(
+		timestamp: string, paymentTokenId: string
+	): Sale {
 		let id = helpers.createSaleId(timestamp)
 		let entity = Sale.load(id)
 		if (entity == null) {
 			entity = new Sale(id)
+			entity.token = paymentTokenId
 		}
 		return entity as Sale
 	}
