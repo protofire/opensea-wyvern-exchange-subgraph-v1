@@ -1,15 +1,15 @@
 import { BigInt, Bytes } from "@graphprotocol/graph-ts"
-import { Erc20Transaction, Token } from "../../generated/schema"
+import { Erc20Transaction, Erc20Token } from "../../generated/schema"
 
-export namespace tokens {
-	export function getOrCreateToken(address: Bytes): Token {
+export namespace erc20Tokens {
+	export function getOrCreateToken(address: Bytes): Erc20Token {
 		let id = address.toHex()
-		let entity = Token.load(id)
+		let entity = Erc20Token.load(id)
 		if (entity == null) {
-			entity = new Token(id)
+			entity = new Erc20Token(id)
 			entity.address = address
 		}
-		return entity as Token
+		return entity as Erc20Token
 	}
 	export function getOrCreateErc20Transaction(
 		timestamp: BigInt, tokenId: string, from: string, to: string,
