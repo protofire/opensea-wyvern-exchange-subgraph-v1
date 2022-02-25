@@ -87,8 +87,6 @@ export function handleAtomicMatch_(call: AtomicMatch_Call): void {
   let sellTakerAddress = call.inputs.addrs[9]
 
 
-
-  //TODO relate filled orders
   //TODO add counters
 
 
