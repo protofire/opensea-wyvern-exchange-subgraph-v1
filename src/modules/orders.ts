@@ -1,6 +1,8 @@
 import { Address, BigInt, Bytes, log, TypedMap } from "@graphprotocol/graph-ts";
 import { Order } from "../../generated/schema";
 import { shared } from "./";
+import { metadata } from "./metadata";
+import { timeSeries } from "./timeSeries";
 
 export namespace orders {
 
@@ -172,7 +174,7 @@ export namespace orders {
 		feeMethod: i32,
 		side: i32,
 		saleKind: i32,
-		target: string,
+		target: Address,
 		howToCall: i32,
 		callData: Bytes,
 		replacementPattern: Bytes,
@@ -221,6 +223,27 @@ export namespace orders {
 	}
 
 	export namespace mutations {
+
+		export function setTimeSeriesRelationships(
+			order: Order,
+			timeSeriesResult: timeSeries.HandleTimeSeriesResult,
+		): Order {
+			order.minute = timeSeriesResult.minute.id
+			order.hour = timeSeriesResult.hour.id
+			order.day = timeSeriesResult.day.id
+			order.week = timeSeriesResult.week.id
+			return order
+		}
+
+		export function setMetadataRelationships(
+			order: Order,
+			metadataResult: metadata.MetadataResult
+		): Order {
+			order.transaction = metadataResult.txId
+			order.block = metadataResult.blockId
+			return order
+		}
+
 		export function setAsFilled(order: Order): Order {
 			let _order = order
 			// _order.status = ORDER_STATUS_FILLED
