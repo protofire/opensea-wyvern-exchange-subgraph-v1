@@ -124,6 +124,8 @@ export namespace mappingHelpers {
 		let erc20Transaction = tokens.getOrCreateErc20Transaction(
 			timestamp, paymentTokenId, buyerId, sellerId, paymentAmount, saleId
 		)
+		erc20Transaction.increasedBalance = sellerBalance.id
+		erc20Transaction.decreasedBalance = buyerBalance.id
 		erc20Transaction.save()
 	}
 
