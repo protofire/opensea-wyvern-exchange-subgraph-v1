@@ -1,5 +1,5 @@
 import { Address, BigInt } from "@graphprotocol/graph-ts";
-import { abi, accounts, assets, balances, nfts, sales, tokens } from "./modules";
+import { abi, accounts, assets, balances, nfts, sales, erc20Tokens } from "./modules";
 
 export namespace mappingHelpers {
 
@@ -18,7 +18,7 @@ export namespace mappingHelpers {
 		// transfer
 
 		let sale = sales.getOrCreateSale(
-			contract.id, nftId.toHexString(), paymentTokenId, timestamp.toString()
+			timestamp.toString(), paymentTokenId
 		)
 		sale.save()
 
@@ -30,8 +30,7 @@ export namespace mappingHelpers {
 
 
 		handleNftTransfer(
-			contract.address!, seller.id, buyer.id, nftId, paymentTokenId,
-			paymentAmount, timestamp, transactionId, sale.id
+			contract.address!, seller.id, buyer.id, nftId, timestamp, sale.id
 		)
 
 		handleErc20Transfer(
@@ -39,6 +38,9 @@ export namespace mappingHelpers {
 			paymentAmount, sale.id, timestamp,
 		)
 
+		handleVolumes(
+			contract.id, paymentTokenId, paymentAmount
+		)
 	}
 
 
@@ -49,9 +51,10 @@ export namespace mappingHelpers {
 	): void {
 
 		let sale = sales.getOrCreateSale(
-			timestamp.toString()
+			timestamp.toString(), paymentTokenId
 		)
 		sale.save()
+
 
 		for (let i = 0; i < decoded.transfers.length; i++) {
 			let from = decoded.transfers[i].from
@@ -69,22 +72,19 @@ export namespace mappingHelpers {
 			contract.save()
 
 			handleNftTransfer(
-				contract.address!, seller.id, buyer.id, nftId, paymentTokenId,
-				paymentAmount, timestamp, transactionId, sale.id
+				contract.address!, seller.id, buyer.id, nftId, timestamp, sale.id
 			)
 
 			handleErc20Transfer(
 				seller.id, buyer.id, paymentTokenId,
 				paymentAmount, sale.id, timestamp,
 			)
-
 		}
 	}
 
 	function handleNftTransfer(
 		contractAddress: Address, seller: string, buyer: string, nftId: BigInt,
-		paymentTokenId: string, paymentAmount: BigInt, timestamp: BigInt,
-		transactionId: string, saleId: string
+		timestamp: BigInt, saleId: string
 
 	): void {
 
@@ -121,7 +121,7 @@ export namespace mappingHelpers {
 		)
 		buyerBalance.save()
 
-		let erc20Transaction = tokens.getOrCreateErc20Transaction(
+		let erc20Transaction = erc20Tokens.getOrCreateErc20Transaction(
 			timestamp, paymentTokenId, buyerId, sellerId, paymentAmount, saleId
 		)
 		erc20Transaction.increasedBalance = sellerBalance.id

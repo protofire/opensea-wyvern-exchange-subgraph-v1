@@ -515,11 +515,8 @@ type Order @entity {
 
   # stored relationships
 
-  "order that matched for the same asset"
-  matchedOrder: Order
-
   "the Sale where this order was involved"
-  sale: Sale 
+  sale: Sale!
 
   "Account who made this order"
   maker: Account

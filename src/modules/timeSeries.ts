@@ -1,7 +1,69 @@
 import { BigInt } from "@graphprotocol/graph-ts";
+import { shared } from ".";
 import { Day, Hour, Minute, Week } from "../../generated/schema";
 
 export namespace timeSeries {
+
+	class TimeSerieInfo {
+		id: string
+		epoch: BigInt
+		constructor(
+			_id: string,
+			_epoch: BigInt
+		) {
+			this.id = _id
+			this.epoch = _epoch
+		}
+	}
+	export class HandleTimeSeriesResult {
+		minute: TimeSerieInfo
+		hour: TimeSerieInfo
+		day: TimeSerieInfo
+		week: TimeSerieInfo
+
+		constructor(
+			_minute: TimeSerieInfo,
+			_hour: TimeSerieInfo,
+			_day: TimeSerieInfo,
+			_week: TimeSerieInfo
+		) {
+			this.minute = _minute
+			this.hour = _hour
+			this.day = _day
+			this.week = _week
+		}
+	}
+
+	export function handleTimeSeries(timestamp: BigInt): HandleTimeSeriesResult {
+
+		let minute = timeSeries.minutes.getOrCreateMinute(
+			shared.date.truncateMinutes(timestamp)
+		)
+		minute.save()
+
+		let hour = timeSeries.hours.getOrCreateHour(
+			shared.date.truncateHours(timestamp)
+		)
+		hour.save()
+
+		let day = timeSeries.days.getOrCreateDay(
+			shared.date.truncateDays(timestamp)
+		)
+		day.save()
+
+		let week = timeSeries.weeks.getOrCreateWeek(
+			shared.date.truncateWeeks(timestamp)
+		)
+		week.save()
+
+		return new HandleTimeSeriesResult(
+			new TimeSerieInfo(minute.id, minute.epoch),
+			new TimeSerieInfo(hour.id, hour.epoch),
+			new TimeSerieInfo(day.id, day.epoch),
+			new TimeSerieInfo(week.id, week.epoch)
+		)
+	}
+
 	export namespace minutes {
 		export function getOrCreateMinute(epoch: BigInt): Minute {
 			let id = "minute-".concat(epoch.toString())
