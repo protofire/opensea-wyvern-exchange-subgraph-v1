@@ -78,9 +78,9 @@ export function handleAtomicMatch_(call: AtomicMatch_Call): void {
   // sellMaker === buyTaker
   // sellTaker === Address.zero
 
-  let buyMakerAddress = call.inputs.addrs[1]
-  let sellMakerAddress = call.inputs.addrs[8]
-  let buyTakerAddress = call.inputs.addrs[2]
+  // let buyMakerAddress = call.inputs.addrs[1]
+  // let sellMakerAddress = call.inputs.addrs[8]
+  // let buyTakerAddress = call.inputs.addrs[2]
   let sellTakerAddress = call.inputs.addrs[9]
 
 
@@ -168,16 +168,8 @@ export function handleAtomicMatch_(call: AtomicMatch_Call): void {
   // TODO calc amounts
 
   // // sellMaker === buyTaker
-  let sellerAmount = shared.helpers.calcOrderAmount(
-    buyOrder.basePrice!,
-    buyOrder.takerProtocolFee!,
-    buyOrder.takerRelayerFee!
-  )
-
-  let buyerAmount = shared.helpers.calcOrderAmount(
-    buyOrder.basePrice!,
-    buyOrder.makerProtocolFee!,
-    buyOrder.makerRelayerFee!
+  let matchPrice = orders.helpers.calculateMatchPrice(
+    buyOrder, sellOrder, call.block.timestamp
   )
 
   let saleTarget = call.inputs.addrs[11]
@@ -190,7 +182,7 @@ export function handleAtomicMatch_(call: AtomicMatch_Call): void {
 
     mappingHelpers.handleBundleSale(
       decoded, metadataResult.txId, paymentToken.id,
-      sellerAmount, timestamp, timeSeriesResult, metadataResult
+      matchPrice, timestamp, timeSeriesResult, metadataResult
     )
 
 
@@ -200,7 +192,7 @@ export function handleAtomicMatch_(call: AtomicMatch_Call): void {
     );
     mappingHelpers.handleSingleSale(
       decoded, metadataResult.txId, call.inputs.addrs[11],
-      paymentToken.id, sellerAmount, timestamp, timeSeriesResult,
+      paymentToken.id, matchPrice, timestamp, timeSeriesResult,
       metadataResult
     )
 

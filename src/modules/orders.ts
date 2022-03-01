@@ -1,4 +1,5 @@
 import { Address, BigInt, Bytes, log, TypedMap } from "@graphprotocol/graph-ts";
+import { address, integer } from "@protofire/subgraph-toolkit";
 import { Order } from "../../generated/schema";
 import { shared } from "./";
 import { globalState } from "./globalState";
@@ -68,6 +69,41 @@ export namespace orders {
 		}
 	}
 	export namespace helpers {
+		export function calculateMatchPrice(buy: Order, sell: Order, now: BigInt): BigInt {
+			/* Calculate sell price. */
+			let sellPrice = calculateFinalPrice(
+				sell.side!, sell.saleKind!, sell.basePrice!,
+				sell.extra!, sell.listingTime!, sell.expirationTIme!, now)
+
+			/* Calculate buy price. */
+			let buyPrice = calculateFinalPrice(
+				buy.side!, buy.saleKind!, buy.basePrice!,
+				buy.extra!, buy.listingTime!, buy.expirationTIme!, now)
+
+			/* Maker/taker priority. */
+			let isMissingSellFeeRecipient = (address.isZeroAddress(Address.fromString(sell.feeRecipient!)))
+			return isMissingSellFeeRecipient ? buyPrice : sellPrice
+
+		}
+
+		function calculateFinalPrice(
+			side: string, saleKind: string, basePrice: BigInt, extra: BigInt,
+			listingTime: BigInt, expirationTime: BigInt, now: BigInt
+		): BigInt {
+			if (saleKind == SALE_KIND_FIXEDPRICE) {
+				return basePrice;
+			} else if (saleKind == SALE_KIND_DUTCHAUCTION) {
+				let diff = (extra.times(now.minus(listingTime))).div(expirationTime.minus(listingTime))
+				if (side == SIDE_SELL) {
+					/* Sell-side - start price: basePrice. End price: basePrice - extra. */
+					return basePrice.div(diff)
+				}
+				// else...
+				/* Buy-side - start price: basePrice. End price: basePrice + extra. */
+				return basePrice.plus(diff)
+			}
+			return integer.ZERO
+		}
 
 
 		export function getFeeMethod(feeMethod: i32): string {
