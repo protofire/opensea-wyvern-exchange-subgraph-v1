@@ -1,4 +1,5 @@
 import { BigInt, ByteArray, log } from "@graphprotocol/graph-ts"
+import { globalState } from "."
 import { Nft, NftTransaction } from "../../generated/schema"
 
 export namespace nfts {
@@ -22,6 +23,7 @@ export namespace nfts {
 			entity = new Nft(id)
 			entity.contract = contract
 			entity.tokenId = tokenId
+			globalState.helpers.updateGlobal_nfts_Counter()
 		}
 		return entity as Nft
 	}

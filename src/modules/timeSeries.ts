@@ -1,5 +1,5 @@
 import { BigInt } from "@graphprotocol/graph-ts";
-import { shared } from ".";
+import { globalState, shared } from ".";
 import { Day, Hour, Minute, Week } from "../../generated/schema";
 
 export namespace timeSeries {
@@ -71,6 +71,7 @@ export namespace timeSeries {
 			if (entity == null) {
 				entity = new Minute(id)
 				entity.epoch = epoch
+				globalState.helpers.updateGlobal_minutes_Counter
 			}
 			return entity as Minute
 		}
@@ -82,6 +83,7 @@ export namespace timeSeries {
 			if (entity == null) {
 				entity = new Hour(id)
 				entity.epoch = epoch
+				globalState.helpers.updateGlobal_hours_Counter
 			}
 			return entity as Hour
 		}
@@ -93,6 +95,7 @@ export namespace timeSeries {
 			if (entity == null) {
 				entity = new Day(id)
 				entity.epoch = epoch
+				globalState.helpers.updateGlobal_days_Counter
 			}
 			return entity as Day
 		}
@@ -104,6 +107,7 @@ export namespace timeSeries {
 			if (entity == null) {
 				entity = new Week(id)
 				entity.epoch = epoch
+				globalState.helpers.updateGlobal_weeks_Counter
 			}
 			return entity as Week
 		}

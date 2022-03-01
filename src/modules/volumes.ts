@@ -2,6 +2,7 @@ import { BigInt } from "@graphprotocol/graph-ts"
 import { integer } from "@protofire/subgraph-toolkit"
 import { MinuteVolume, HourVolume, DayVolume, WeekVolume } from "../../generated/schema"
 import { timeSeries } from "./";
+import { globalState } from "./globalState";
 export namespace volumes {
 
 	export class VolumesResult {
@@ -103,6 +104,8 @@ export namespace volumes {
 				entity.amount = integer.ZERO
 				entity.transactionAmount = integer.ZERO
 				entity.timeUnit = timeUnitId
+				globalState.helpers.updateGlobal_minuteVolumes_Counter()
+
 			}
 			return entity as MinuteVolume
 		}
@@ -128,7 +131,8 @@ export namespace volumes {
 				entity.amount = integer.ZERO
 				entity.transactionAmount = integer.ZERO
 				entity.timeUnit = timeUnitId
-				entity.timeUnit = timeUnitId
+				globalState.helpers.updateGlobal_hourVolumes_Counter()
+
 			}
 			return entity as HourVolume
 		}
@@ -154,6 +158,8 @@ export namespace volumes {
 				entity.amount = integer.ZERO
 				entity.transactionAmount = integer.ZERO
 				entity.timeUnit = timeUnitId
+				globalState.helpers.updateGlobal_dayVolumes_Counter()
+
 			}
 			return entity as DayVolume
 		}
@@ -179,6 +185,7 @@ export namespace volumes {
 				entity.amount = integer.ZERO
 				entity.transactionAmount = integer.ZERO
 				entity.timeUnit = timeUnitId
+				globalState.helpers.updateGlobal_weekVolumes_Counter()
 			}
 			return entity as WeekVolume
 		}

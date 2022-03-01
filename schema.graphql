@@ -36,45 +36,45 @@ type GlobalState @entity {
  "internal id used for indexation"
   id: ID!
 
-  Counters: EntityCounter!
+  counters: EntityCounter!
 
-  Accounts: EntityCounter!
+  accounts: EntityCounter!
 
-  Balances: EntityCounter!
+  balances: EntityCounter!
 
-  Erc20Tokens: EntityCounter!
+  erc20tokens: EntityCounter!
 
-  Erc20Transactions: EntityCounter!
+  erc20transactions: EntityCounter!
 
-  Nfts: EntityCounter!
+  nfts: EntityCounter!
 
-  NftContracts: EntityCounter!
+  nftContracts: EntityCounter!
 
-  NftTransactions: EntityCounter!
+  nftTransactions: EntityCounter!
 
-  Sales: EntityCounter!
+  sales: EntityCounter!
 
-  Orders: EntityCounter!
+  orders: EntityCounter!
 
-  Blocks: EntityCounter!
+  blocks: EntityCounter!
 
-  Transactions: EntityCounter!
+  transactions: EntityCounter!
 
-  MinuteVolumes: EntityCounter!
+  minuteVolumes: EntityCounter!
 
-  HourVolumes: EntityCounter!
+  hourVolumes: EntityCounter!
 
-  DayVolumes: EntityCounter!
+  dayVolumes: EntityCounter!
 
-  WeekVolumes: EntityCounter!
+  weekVolumes: EntityCounter!
 
-  Minutes: EntityCounter!
+  minutes: EntityCounter!
 
-  Hours: EntityCounter!
+  hours: EntityCounter!
 
-  Days: EntityCounter!
+  days: EntityCounter!
 
-  Weeks: EntityCounter!
+  weeks: EntityCounter!
 }
 
 type EntityCounter @entity {

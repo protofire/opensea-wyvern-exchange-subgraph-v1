@@ -1,3 +1,4 @@
+import { globalState } from "."
 import { Sale } from "../../generated/schema"
 
 export namespace sales {
@@ -14,6 +15,7 @@ export namespace sales {
 		if (entity == null) {
 			entity = new Sale(id)
 			entity.token = paymentTokenId
+			globalState.helpers.updateGlobal_sales_Counter()
 		}
 		return entity as Sale
 	}

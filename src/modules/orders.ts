@@ -1,6 +1,7 @@
 import { Address, BigInt, Bytes, log, TypedMap } from "@graphprotocol/graph-ts";
 import { Order } from "../../generated/schema";
 import { shared } from "./";
+import { globalState } from "./globalState";
 import { metadata } from "./metadata";
 import { timeSeries } from "./timeSeries";
 
@@ -213,6 +214,7 @@ export namespace orders {
 		entity.listingTime = listingTime
 		entity.expirationTIme = expirationTIme
 		entity.salt = salt
+		globalState.helpers.updateGlobal_orders_Counter()
 		return entity as Order
 	}
 

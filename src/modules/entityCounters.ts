@@ -16,7 +16,7 @@ export namespace entityCounters {
 		return entity as EntityCounter
 	}
 
-	export function handleCounter(parentId: string, name: string): void {
+	export function increaseAndSaveCounter(parentId: string, name: string): void {
 		let entity = loadOrCreateEntityCounter(parentId, name)
 		entity = mutations.increaseCounterAmount(entity)
 		entity.save()
@@ -25,7 +25,7 @@ export namespace entityCounters {
 	export namespace helpers {
 		export function getCounterparentId(
 			parentparentId: string, name: string
-		) {
+		): string {
 			return `${parentparentId}-${name}`
 		}
 	}
