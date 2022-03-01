@@ -15,4 +15,5 @@ export namespace accounts {
 		entity.lastUpdatedAt = txId
 		return entity as Account
 	}
+
 }

@@ -1,7 +1,4 @@
-import {
-  AtomicMatch_Call,
-  OrderCancelled,
-} from "../generated/openseaWyvernExchange/openseaWyvernExchange"
+import { AtomicMatch_Call } from "../generated/openseaWyvernExchange/openseaWyvernExchange"
 import { mappingHelpers } from "./mappingHelpers"
 
 import {
