@@ -86,6 +86,12 @@ export namespace orders {
 
 		}
 
+		function safeDiv(a: BigInt, b: BigInt): BigInt {
+			let _a = a === integer.ZERO ? integer.ONE : a
+			let _b = b === integer.ZERO ? integer.ONE : b
+			return _a.div(_b)
+		}
+
 		function calculateFinalPrice(
 			side: string, saleKind: string, basePrice: BigInt, extra: BigInt,
 			listingTime: BigInt, expirationTime: BigInt, now: BigInt
@@ -93,10 +99,13 @@ export namespace orders {
 			if (saleKind == SALE_KIND_FIXEDPRICE) {
 				return basePrice;
 			} else if (saleKind == SALE_KIND_DUTCHAUCTION) {
-				let diff = (extra.times(now.minus(listingTime))).div(expirationTime.minus(listingTime))
+				let diff = safeDiv(
+					extra.times(now.minus(listingTime)),
+					expirationTime.minus(listingTime)
+				)
 				if (side == SIDE_SELL) {
 					/* Sell-side - start price: basePrice. End price: basePrice - extra. */
-					return basePrice.div(diff)
+					return basePrice.minus(diff)
 				}
 				// else...
 				/* Buy-side - start price: basePrice. End price: basePrice + extra. */
