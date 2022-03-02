@@ -6,10 +6,55 @@ _Made by Protoire.io under MIT License_
 
 This subgraph custom approach based on the orders book and assets management trough an time series entities model and it's complemented w/ a layer of metadata such as block and transaction information. 
 
+The main functionality of this subgraph is to index the openSea sales (matched order) the nft tokens, their owners, the erc20 tokens used to pay for them an the nft and erc20 transactions associated.
+
+Future updates:
+- Open listings 
+
 Thys subgraph rely's on this contract:
 - OpenSea WyvernExchange: 0x7Be8076f4EA4A4AD08075C2508e481d6C946D12b
 
 TODO: relationship diagrams
+
+## Relationship diagram
+Simple lookup table for relationship between entities.
+
+### Reference:
+
+| **Name**       | **Indicator** 
+|------------------|-------------
+| Account          | x           
+| Derived	       |     D
+| Many To One      |     OTM
+| One To One   	   |     OTO
+| Not related      |     -
+
+### Table:
+
+| **entity**       | **Account** | **Balance** | **Erc20Token** | **Erc20Transaction** | **Nft** | **NftContract** | **NftTransaction** | **Sale** | **Order** | **MinuteVolume** | **HourVolume** | **DayVolume** | **WeekVolume** | **Minute** | **Hour** | **Day** | **Week** | **Block** | **Transaction** |
+|------------------|-------------|-------------|----------------|----------------------|---------|-----------------|--------------------|----------|-----------|------------------|----------------|---------------|----------------|------------|----------|---------|----------|-----------|-----------------|
+| Account          | x           | D           | -              | D                    | D       | -               | D                  | -        | D         | -                | -              | -             | -              | -          | -        | -       | -        | -         | -               |
+| Balance          | MTO         | x           | MTO            | D                    | -       | -               | -                  | -        | -         | -                | -              | -             | -              | -          | -        | -       | -        | -         | -               |
+| Erc20Token       | -           | D           | x              | D                    | -       | -               | -                  | D        | D         | D                | D              | D             | D              | -          | -        | -       | -        | -         | -               |
+| Erc20Transaction | MTO         | MTO         | MTO            | x                    | -       | -               | -                  | OTO      | -         | MTO              | MTO            | MTO           | MTO            | MTO        | MTO      | MTO     | MTO      | MTO       | MTO             |
+| Nft              | MTO         | -           | -              | -                    | x       | MTO             | D                  | -        | -         | -                | -              | -             | -              | -          | -        | -       | -        | -         | -               |
+| NftContract      | -           | -           | -              | -                    | D       | x               | -                  | -        | -         | D                | D              | D             | D              | -          | -        | -       | -        | -         | -               |
+| NftTransaction   | MTO         | -           | -              | -                    | MTO     | MTO             | x                  | MTO      | -         | MTO              | MTO            | MTO           | MTO            | MTO        | MTO      | MTO     | MTO      | MTO       | MTO             |
+| Sale             | -           | -           | MTO            | D                    | -       | -               | D                  | x        | D         | -                | -              | -             | -              | MTO        | MTO      | MTO     | MTO      | MTO       | MTO             |
+| Order            | MTO         | -           | MTO            | -                    | -       | MTO             | -                  | MTO      | x         | -                | -              | -             | -              | MTO        | MTO      | MTO     | MTO      | MTO       | MTO             |
+| MinuteVolume     | -           | -           | MTO            | D                    | -       | MTO             | D                  | -        | -         | x                | -              | -             | -              | MTO        | -        | -       | -        | -         | -               |
+| HourVolume       | -           | -           | MTO            | D                    | -       | MTO             | D                  | -        | -         | -                | x              | -             | -              | -          | MTO      | -       | -        | -         | -               |
+| DayVolume        | -           | -           | MTO            | D                    | -       | MTO             | D                  | -        | -         | -                | -              | x             | -              | -          | -        | MTO     | -        | -         | -               |
+| WeekVolume       | -           | -           | MTO            | D                    | -       | MTO             | D                  | -        | -         | -                | -              | -             | x              | -          | -        | -       | MTO      | -         | -               |
+| Minute           | -           | -           | -              | D                    | -       | -               | D                  | D        | D         | D                | -              | -             | -              | x          | -        | -       | -        |           |                 |
+| Hour             | -           | -           | -              | D                    | -       | -               | D                  | D        | D         | -                | D              | -             | -              | -          | x        | -       | -        |           |                 |
+| Day              | -           | -           | -              | D                    | -       | -               | D                  | D        | D         | -                | -              | D             | -              | -          | -        | x       | -        |           |                 |
+| Week             | -           | -           | -              | D                    | -       | -               | D                  | D        | D         | -                | -              | -             | D              | -          | -        | -       | x        |           |                 |
+| Block            | -           | -           | -              | D                    | -       | -               | D                  | D        | D         | -                | -              | -             | -              |            |          |         |          | x         | D               |
+| Transaction      | -           | -           | -              | D                    | -       | -               | D                  | D        | D         | -                | -              | -             | -              |            |          |         |          | MTO       | x               |
+
+
+# Entities description
 
 ## Order
 
