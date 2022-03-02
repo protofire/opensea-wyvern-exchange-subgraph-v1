@@ -134,6 +134,153 @@ This entity stores an amount of tokens and represents a Many to Many relationshi
 }
 ```
 
+___
+
+## Interface: SmartContract
+
+### Stored relationships:
+
+
+### Derived relationships:
+
+### Example:
+
+```graphql
+	# TODO
+{
+  
+}
+```
+___
+## Erc20Token
+
+OpenSea allows the users to pay in a wide diversity of erc20 tokens and the Token entitiy represent them and it's relations with entities such as: volumes, orders & erc20Tranasctions. Those entities are related to time series and accounts entities.
+
+
+### Stored relationships:
+
+
+### Derived relationships:
+
+### Example:
+
+```graphql
+	# TODO
+{
+  
+}
+```
+___
+
+## NftContract
+
+
+A given nft contract containning NFTs, provides a relationship between accounts trough the "Asset owner entity" and orders opened under this "target".
+
+
+### Stored relationships:
+
+
+### Derived relationships:
+
+### Example:
+
+```graphql
+	# TODO
+{
+  
+}
+```
+___
+## Interface SmartContractTransaction
+
+### Stored relationships:
+
+
+### Derived relationships:
+
+### Example:
+
+```graphql
+	# TODO
+{
+  
+}
+```
+___
+
+## Erc20Transaction
+
+Any time an erc20 is traded an Erc20Transaction entity will be created. This entitiy has many relationships suchs as volume entities, time series, orders, accounts, blocks and transactions(evm).
+Allowing this subgraph to be source for many kinds of data visualizations.
+
+### Stored relationships:
+
+
+### Derived relationships:
+
+### Example:
+
+```graphql
+	# TODO
+{
+  
+}
+```
+___
+
+## NftTransaction
+
+### Stored relationships:
+
+
+### Derived relationships:
+
+### Example:
+
+```graphql
+	# TODO
+{
+  
+}
+```
+___
+
+## Nft
+
+### Stored relationships:
+
+
+### Derived relationships:
+
+### Example:
+
+```graphql
+	# TODO
+{
+  
+}
+```
+___
+
+## Sale
+
+### Stored relationships:
+
+
+### Derived relationships:
+
+### Example:
+
+```graphql
+	# TODO
+{
+  
+}
+```
+___
+
+
 ## Order
 
 	- OrderApprovedPartOne(indexed bytes32,address,indexed address,address,uint256,uint256,uint256,uint256,indexed address,uint8,uint8,uint8,address)
@@ -163,7 +310,7 @@ multi-event yield condition requires to add the following enum to the order sche
 
 This Order entity is the starting point for building the whole subgraph
 
-# Time-series
+# Interface Time-series
 
 Each Order is yield in the context of a transaction inside an specific block. Each block contains an unix timestamp which can be divided to obtain the Minute, Hour, Day and Week epoch. Those entities are based on the time unit entity 
 
@@ -189,7 +336,24 @@ Each Order is yield in the context of a transaction inside an specific block. Ea
 
 This allows the subgraph to index the information metadata based (block or transaction) or time based relating Vollumen, Blocks, Transactions and orders with an specific date.
 
-## Volume 
+### Stored relationships:
+
+
+### Derived relationships:
+
+### Example:
+
+```graphql
+	# TODO
+{
+  
+}
+```
+___
+
+## Interface Volume 
+
+
 
 Every asset exchange calculates the volume known as the amount of something traded at some point in time. For this subgraph "Volume" is the interface where volumes are stored and matched with an specific time unit such as “minuteVolume”.
 
@@ -221,48 +385,37 @@ This entity creates relationships between entities suchs as: erc20Transactions, 
 		timeUnit: TimeUnit!
 	}
 
-## Token
-
-OpenSea allows the users to pay in a wide diversity of erc20 tokens and the Token entitiy represent them and it's relations with entities such as: volumes, orders & erc20Tranasctions. Those entities are related to time series and accounts entities.
-
-## Erc20Transaction
-
-Any time an erc20 is traded an Erc20Transaction entity will be created. This entitiy has many relationships suchs as volume entities, time series, orders, accounts, blocks and transactions(evm).
-Allowing this subgraph to be source for many kinds of data visualizations.
-
-## Balance
-
-The Balance entitiy is used to represent this many-tomany relationship between accounts and tokens since an account can hold many erc20 tokens and a erc20 token can be owned by multiple accounts. This entity also relates to each Erc20Transaction so this subgraph can shown the wallet size of a given user in any given time.
-
-	type Balance @entity {
-		"internal id used for indexation"
-		id: ID!
-
-		"balance's owner"
-		account: Account!
-
-		"related token"
-		token: Token!
-
-		"token's amount"
-		amount: BigInt!
-
-		erc20Transactions: [Erc20Transaction!]! @derivedFrom(field: "balance")
-	}
+### Stored relationships:
 
 
+### Derived relationships:
+
+### Example:
+
+```graphql
+	# TODO
+{
+  
+}
+```
+___
+
+## Interface Metadata
+
+### Stored relationships:
 
 
-## Asset
+### Derived relationships:
 
-A given nft contract containning NFTs, provides a relationship between accounts trough the "Asset owner entity" and orders opened under this "target".
+### Example:
 
-##  Nft
-
-WIP: the token entity it's under construction. 
-
-
-## Metadata entities
+```graphql
+	# TODO
+{
+  
+}
+```
+___
 
 ### Transaction
 
@@ -336,5 +489,3 @@ Each piece of the blockchains, contins a number and a timestamp and is related t
    }
 }
 ```
-
-## Token
