@@ -1,4 +1,5 @@
 import { BigInt, Bytes } from "@graphprotocol/graph-ts"
+import { globalState } from "."
 import { Erc20Transaction, Erc20Token } from "../../generated/schema"
 
 export namespace erc20Tokens {
@@ -8,6 +9,8 @@ export namespace erc20Tokens {
 		if (entity == null) {
 			entity = new Erc20Token(id)
 			entity.address = address
+			globalState.helpers.updateGlobal_erc20tokens_Counter()
+
 		}
 		return entity as Erc20Token
 	}
@@ -25,6 +28,8 @@ export namespace erc20Tokens {
 			entity.contract = tokenId
 			entity.amount = amount
 			entity.sale = sale
+			globalState.helpers.updateGlobal_erc20transactions_Counter()
+
 		}
 		return entity as Erc20Transaction
 	}

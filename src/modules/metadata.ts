@@ -1,5 +1,5 @@
 import { BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts";
-import { timeSeries } from ".";
+import { globalState, timeSeries } from ".";
 import { Block, Transaction } from "../../generated/schema";
 
 export namespace metadata {
@@ -56,6 +56,8 @@ export namespace metadata {
 				block.timestamp = timestamp
 				block.number = number
 				// block.erc721TransactionsCount = integer.ZERO
+				globalState.helpers.updateGlobal_blocks_Counter()
+
 			}
 			return block as Block
 		}
@@ -74,6 +76,8 @@ export namespace metadata {
 				meta.hash = hash
 				meta.from = from
 				meta.gasPrice = gasPrice
+				globalState.helpers.updateGlobal_transactions_Counter()
+
 			}
 			return meta as Transaction
 		}

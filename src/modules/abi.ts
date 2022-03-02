@@ -1,6 +1,5 @@
 import { Address, BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts";
 import { log } from "matchstick-as";
-import { shared } from "./";
 
 export namespace abi {
 

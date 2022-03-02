@@ -32,6 +32,65 @@ type ENTITY_NAME @entity {
 
 # TODO global state entitiy: counters and averages
 
+type GlobalState @entity {
+ "internal id used for indexation"
+  id: ID!
+
+  counters: EntityCounter!
+
+  accounts: EntityCounter!
+
+  balances: EntityCounter!
+
+  erc20tokens: EntityCounter!
+
+  erc20transactions: EntityCounter!
+
+  nfts: EntityCounter!
+
+  nftContracts: EntityCounter!
+
+  nftTransactions: EntityCounter!
+
+  sales: EntityCounter!
+
+  orders: EntityCounter!
+
+  blocks: EntityCounter!
+
+  transactions: EntityCounter!
+
+  minuteVolumes: EntityCounter!
+
+  hourVolumes: EntityCounter!
+
+  dayVolumes: EntityCounter!
+
+  weekVolumes: EntityCounter!
+
+  minutes: EntityCounter!
+
+  hours: EntityCounter!
+
+  days: EntityCounter!
+
+  weeks: EntityCounter!
+}
+
+type EntityCounter @entity {
+ "internal id used for indexation"
+  id: ID!
+
+  # stored values
+
+  "the name of the entity it's being counted"
+  name: String
+
+  "amount of entities"
+  amount: BigInt!
+}
+
+
 # "an Account as nft and erc20 holder, buyer, and seller"
 type Account @entity {
   "internal id used for indexation"
