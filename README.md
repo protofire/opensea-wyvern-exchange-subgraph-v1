@@ -9,6 +9,8 @@ This subgraph custom approach based on the orders book and assets management tro
 Thys subgraph rely's on this contract:
 - OpenSea WyvernExchange: 0x7Be8076f4EA4A4AD08075C2508e481d6C946D12b
 
+TODO: relationship diagrams
+
 ## Order
 
 	- OrderApprovedPartOne(indexed bytes32,address,indexed address,address,uint256,uint256,uint256,uint256,indexed address,uint8,uint8,uint8,address)
