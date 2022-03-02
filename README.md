@@ -56,6 +56,49 @@ Simple lookup table for relationship between entities.
 
 # Entities description
 
+## Account
+
+This entity store information about EVM's wallets (EOA or smart contract), the ones that will trade and hold the assets.
+Is an entity that only stores the wallet's public address.
+
+### Derived relationships
+
+#### Orders:
+
+- makerOrders: orders were this account added liquidity to the market
+
+- takerOrders: orders where this account extracted liquidity from the market
+
+#### Erc20Tokens:
+
+- balances: a many to many relationship betwen a Erc20Token and some account with some amount of tokens
+
+#### Erc20Transactions:
+
+- outgoingErc20Transaction: er20 tokens deposited into the market in maker Orders 
+
+- incomingErc20Transaction: er20 tokens retired from the market in taker Orders 
+
+#### Nfts
+
+- nfts: nft tokens owned by this account
+
+#### NftTransactions:
+
+- incomingNftTransactions: Nft's sent to this account (adquisition)
+- outgoingNftTransactions: Nft's sent form this account (transfer)
+
+### Example:
+
+```graphql
+	# TODO
+{
+  accounts{
+    address
+  }
+}
+```
+
 ## Order
 
 	- OrderApprovedPartOne(indexed bytes32,address,indexed address,address,uint256,uint256,uint256,uint256,indexed address,uint8,uint8,uint8,address)
@@ -173,24 +216,7 @@ The Balance entitiy is used to represent this many-tomany relationship between a
 	}
 
 
-## Account
 
-This entity store information about EVM's wallets, the ones that will trade and hold the assets.
-Is an entity that only stores the wallet's public address.
-
-Relates to orders in two ways:
-
-- makerOrders: orders were this account added liquidity to the market
-
-- takerOrders: orders where this account extracted liquidity from the market
-
-Related to erc20Transactions in two ways:
-
-- outgoingErc20Transaction: er20 tokens deposited into the market in maker Orders 
-
-- incomingErc20Transaction: er20 tokens retired from the market in taker Orders 
-
-The account also contains useful information such as assets owned by the account in the form of AssetOwner's entities, tokens owned in the form of Balance's entities.
 
 ## Asset
 
