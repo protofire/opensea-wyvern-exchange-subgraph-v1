@@ -99,6 +99,41 @@ Is an entity that only stores the wallet's public address.
 }
 ```
 
+___
+
+## Balance
+
+This entity stores an amount of tokens and represents a Many to Many relationship betwen Accounts and Erc20Tokens since each Account can hold many tokens and each Erc20Token can be held by many accounts.
+
+### Stored relationships:
+
+#### Account: 
+
+- account: The Account that holds some amount of some token
+
+#### Erc20Token: 
+
+- token: The Erc20Token that is being held by the Account
+
+### Derived relationships:
+
+#### Erc20Transactions:
+
+- increasingTransactions: erc20Transactions that increased the amount of tokens for this balance
+
+- decreasingTransactions: erc20Transactions that decreased  the amount of tokens for this balance
+
+### Example:
+
+```graphql
+	# TODO
+{
+  balances{
+    amount
+  }
+}
+```
+
 ## Order
 
 	- OrderApprovedPartOne(indexed bytes32,address,indexed address,address,uint256,uint256,uint256,uint256,indexed address,uint8,uint8,uint8,address)
