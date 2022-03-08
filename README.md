@@ -138,17 +138,38 @@ ___
 
 ## Interface: SmartContract
 
+This interface provides a common place for defining both erc20 contracts and nftContracts. It only contains information aboutocntract's address and provides relationships with other entities
+
 ### Stored relationships:
 
+- No relationships are stored in entities with this interface
 
 ### Derived relationships:
+
+- Orders: the orders where this contract was traded (as a payment token or as an nft)
+
+- Volumes: All of the volume-kind entities where this contract was traded
+
 
 ### Example:
 
 ```graphql
 	# TODO
 {
-  
+	smartContracts {
+		address
+		... on Erc20Token{
+			balances {
+				amount
+			}
+		}
+		... on NftContract{
+			id
+			owner {
+				address
+			}
+		}
+	}
 }
 ```
 ___
@@ -159,27 +180,52 @@ OpenSea allows the users to pay in a wide diversity of erc20 tokens and the Toke
 
 ### Stored relationships:
 
+- No relationships are stored this kind of entity
 
 ### Derived relationships:
 
+#### Accounts:
+
+- balances: a many to many relationship betwen a Erc20Token and some account with some amount of tokens
+
+### SmartContractTransacitons:
+
+- tokenTransactions: Transactions that transfered tokens from this contract between Accounts
+
+### Sales
+
+- Sales: Sales where this token was used as a payment token
+
+### Orders
+
+- orders: Orders where this contract's address is stored as payment Token
+
+### Volumes
+
+- MinuteVolume, HourVolume, DayVolume, WeekVolume: Volume entities representing the total value and transactions for a given timeframe
 ### Example:
 
 ```graphql
 	# TODO
 {
-  
+  Erc20Token{
+		balances {
+			amount
+		}
+		
+	}
 }
 ```
 ___
 
 ## NftContract
 
-
 A given nft contract containning NFTs, provides a relationship between accounts trough the "Asset owner entity" and orders opened under this "target".
 
 
 ### Stored relationships:
 
+- No relationships are stored this kind of entity
 
 ### Derived relationships:
 
