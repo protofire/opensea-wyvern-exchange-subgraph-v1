@@ -336,7 +336,7 @@ ___
 
 ## Erc20Transaction
 
-The Erc20Transaction entity will be created each time an erc20 is traded in for of a payment for a Sale (two succesfully matched orders). Be aware that a Sale will create always a single erc20Transaction since both regular and bundle orders have only one ayment
+The Erc20Transaction entity will be created each time an erc20 is traded in for of a payment for a Sale (two succesfully matched orders). Be aware that a Sale will create always a single erc20Transaction since both regular and bundle orders have only one payment.
 
 ### Stored relationships:
 
@@ -374,17 +374,31 @@ ___
 
 ## NftTransaction
 
+The NftTransaction entity will be created each time an Nft is traded in as resilt of a Sale (two succesfully matched orders). Be aware that a Sale can create one or many NftTransactions since a sale can be single or bundle asset. 
+
 ### Stored relationships:
 
+- Same es "smartContractTransaction interface" 
 
 ### Derived relationships:
+
+- No relationship are derived to this entity
 
 ### Example:
 
 ```graphql
-	# TODO
+	# All of the nfts sold by some Account
 {
-  
+	nftTransactions(
+		where:{
+			from: "0xSomeAccountAddress"
+		}
+	){
+		timestamp
+		nft{
+			id
+		}
+	}
 }
 ```
 ___
