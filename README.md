@@ -405,17 +405,40 @@ ___
 
 ## Nft
 
+This entity represents an Nft from a erc721 or a erc1155 smart contract.
+Contains a very simple information about the tokenId, the account that holds it and the contract qhere it's stored.
+
 ### Stored relationships:
 
+#### Accounts
+- owner: an account that owns this Nft
+
+#### NftContracts
+- contract: an standar erc721 or erc1155 where this nft is stored.
 
 ### Derived relationships:
+
+#### NftTransactions
+
+- nftTransactions: All of the transactions where this Nft change it's owner
 
 ### Example:
 
 ```graphql
-	# TODO
+	# current and past owners for some Nft
 {
-  
+  nft (
+	_id: "someNftId" # where `${contractAddres}-${tokenID}`
+  ){
+	owner{
+		address
+	}
+	nftTransactions{
+		from{
+			address
+		}
+	}
+  }
 }
 ```
 ___
