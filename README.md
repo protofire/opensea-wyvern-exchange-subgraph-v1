@@ -154,19 +154,23 @@ This interface provides a common place for defining both erc20 contracts and nft
 ### Example:
 
 ```graphql
-	# TODO
+	# All erc20 and Nft contracts with their owners 
 {
 	smartContracts {
 		address
 		... on Erc20Token{
 			balances {
-				amount
+				accounts {
+					address
+				}
 			}
 		}
 		... on NftContract{
 			id
-			owner {
-				address
+			nfts {
+				owner {
+					address
+				}
 			}
 		}
 	}
@@ -206,11 +210,16 @@ OpenSea allows the users to pay in a wide diversity of erc20 tokens and the Toke
 ### Example:
 
 ```graphql
-	# TODO
+	# The whole list of owners of some token and the amount they hold
 {
-  Erc20Tokens{
+  Erc20Token (where: {
+	address: "0xSomeErc20ContractAddres"
+  }){
 		balances {
 			amount
+			account {
+				address
+			}
 		}
 		
 	}
@@ -246,7 +255,9 @@ A given nft contract containning NFTs, provides a relationship between accounts 
 ```graphql
 	# the whole list of owners fro a given nft contract
 {
-  NftContracts {
+  NftContract (where: {
+	address: "0xSomeNftContractAddres"
+  }) {
 	  nfts {
 		  id
 		  owners {
@@ -259,17 +270,66 @@ A given nft contract containning NFTs, provides a relationship between accounts 
 ___
 ## Interface SmartContractTransaction
 
+This interface provides and standard approach to represent interactions with nft or erc20 contracts in the context of the openSea marketplace. Contains information about the sale where this transaction was triggered, the Accounts involved, the contract that stores the tokens transfered and the time when the transaction was made.
+
+Is one of the main pieces of this subgraph because relate to many other entities. It's like some sort of highway where you can go between any entitiy. 
+
 ### Stored relationships:
 
+### Accounts
 
+- from: The account that sent the tokens
+- to: The account that recieved the tokens
+
+### SmartContracts
+
+- contract: the erc20 or nftContract where the transfered tokens are stored
+
+### Sales
+
+- sale: the Sale (as two succesfully matched orders) where this transacción was triggered. Each sale relates one erc20 SmartContractTransaction and can relate to one or many Nft SmartContractTransactions
+
+### Metadata
+
+- Block: the block entity where this transaction was sent
+
+- Transaction: the transaction entity where this transaction was sent
+
+### TimeSeries 
+
+- Minute, Hour, Day, Week: Time units where this transaction was sent (allow us to know the transactions for each day)
+
+### Volumes
+
+- All of the volume-kind entities where this transaction was included (allow us to know which transactions the amount of tokens traded for a given timeframe)
 ### Derived relationships:
 
+- No relationship are derived to this entity
 ### Example:
 
 ```graphql
-	# TODO
+	# all of the erc20 and nft transactions made by some Account
 {
-  
+	SmartContractTransactions(
+		where:{
+			from: "0xSomeAccountAddress"
+		}
+	) {
+		... on Erc20Transaction{
+			amount
+			contract {
+				address
+			}
+		}
+		... on NftTransaction{
+			nft{
+				id
+			}
+			contract{
+				address
+			}
+		}
+	}
 }
 ```
 ___
