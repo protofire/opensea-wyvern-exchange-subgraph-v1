@@ -208,7 +208,7 @@ OpenSea allows the users to pay in a wide diversity of erc20 tokens and the Toke
 ```graphql
 	# TODO
 {
-  Erc20Token{
+  Erc20Tokens{
 		balances {
 			amount
 		}
@@ -229,12 +229,31 @@ A given nft contract containning NFTs, provides a relationship between accounts 
 
 ### Derived relationships:
 
+### SmartContractTransacitons:
+
+- tokenTransactions: Transactions that transfered some token from this contract between Accounts
+
+### Orders
+
+- orders: Orders where this contract's address is stored as target
+
+### Volumes
+
+- MinuteVolume, HourVolume, DayVolume, WeekVolume: Volume entities representing the total amount of tokens and transactions for a given timeframe
+
 ### Example:
 
 ```graphql
-	# TODO
+	# the whole list of owners fro a given nft contract
 {
-  
+  NftContracts {
+	  nfts {
+		  id
+		  owners {
+			  address
+		  }
+	  }
+  }
 }
 ```
 ___
