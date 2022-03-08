@@ -192,19 +192,19 @@ OpenSea allows the users to pay in a wide diversity of erc20 tokens and the Toke
 
 - balances: a many to many relationship betwen a Erc20Token and some account with some amount of tokens
 
-### SmartContractTransacitons:
+#### SmartContractTransacitons:
 
 - tokenTransactions: Transactions that transfered tokens from this contract between Accounts
 
-### Sales
+#### Sales
 
 - Sales: Sales where this token was used as a payment token
 
-### Orders
+#### Orders
 
 - orders: Orders where this contract's address is stored as payment Token
 
-### Volumes
+#### Volumes
 
 - MinuteVolume, HourVolume, DayVolume, WeekVolume: Volume entities representing the total value and transactions for a given timeframe
 ### Example:
@@ -236,17 +236,17 @@ A given nft contract containning NFTs, provides a relationship between accounts 
 
 - No relationships are stored this kind of entity
 
-### Derived relationships:
+#### Derived relationships:
 
-### SmartContractTransacitons:
+#### SmartContractTransacitons:
 
 - tokenTransactions: Transactions that transfered some token from this contract between Accounts
 
-### Orders
+#### Orders
 
 - orders: Orders where this contract's address is stored as target
 
-### Volumes
+#### Volumes
 
 - MinuteVolume, HourVolume, DayVolume, WeekVolume: Volume entities representing the total amount of tokens and transactions for a given timeframe
 
@@ -276,30 +276,30 @@ Is one of the main pieces of this subgraph because relate to many other entities
 
 ### Stored relationships:
 
-### Accounts
+#### Accounts
 
 - from: The account that sent the tokens
 - to: The account that recieved the tokens
 
-### SmartContracts
+#### SmartContracts
 
 - contract: the erc20 or nftContract where the transfered tokens are stored
 
-### Sales
+#### Sales
 
 - sale: the Sale (as two succesfully matched orders) where this transacción was triggered. Each sale relates one erc20 SmartContractTransaction and can relate to one or many Nft SmartContractTransactions
 
-### Metadata
+#### Metadata
 
 - Block: the block entity where this transaction was sent
 
 - Transaction: the transaction entity where this transaction was sent
 
-### TimeSeries 
+#### TimeSeries 
 
 - Minute, Hour, Day, Week: Time units where this transaction was sent (allow us to know the transactions for each day)
 
-### Volumes
+#### Volumes
 
 - All of the volume-kind entities where this transaction was included (allow us to know which transactions the amount of tokens traded for a given timeframe)
 ### Derived relationships:
@@ -336,20 +336,38 @@ ___
 
 ## Erc20Transaction
 
-Any time an erc20 is traded an Erc20Transaction entity will be created. This entitiy has many relationships suchs as volume entities, time series, orders, accounts, blocks and transactions(evm).
-Allowing this subgraph to be source for many kinds of data visualizations.
+The Erc20Transaction entity will be created each time an erc20 is traded in for of a payment for a Sale (two succesfully matched orders). Be aware that a Sale will create always a single erc20Transaction since both regular and bundle orders have only one ayment
 
 ### Stored relationships:
 
+- Same es "smartContractTransaction interface" 
+
+#### Balances
+
+- increasedBalance: The Balance entity that increased the value of it's "amount" field (to track the growth of the Account's balance).
+- decreasedBalance: The Balance entity that increased the value of it's "amount" field.
 
 ### Derived relationships:
+
+- No relationship are derived to this entity
 
 ### Example:
 
 ```graphql
-	# TODO
+	# List the transactions for a given ercToken
 {
-  
+	erc20Transactions (
+		where: {
+			contract: "0xSomeErc20Address"
+		}
+	){
+		from {
+			address
+		}
+		to {
+			address
+		}
+	}
 }
 ```
 ___
