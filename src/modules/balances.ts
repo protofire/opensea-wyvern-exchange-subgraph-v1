@@ -1,6 +1,7 @@
 import { BigInt } from "@graphprotocol/graph-ts"
 import { integer } from "@protofire/subgraph-toolkit"
-import { Balance } from "../../../generated/schema"
+import { globalState } from "."
+import { Balance } from "../../generated/schema"
 
 export namespace balances {
 	export namespace helpers {
@@ -18,6 +19,8 @@ export namespace balances {
 			entity.account = ownerId
 			entity.token = tokenId
 			entity.amount = integer.ZERO
+			globalState.helpers.updateGlobal_balances_Counter()
+
 		}
 		return entity as Balance
 	}

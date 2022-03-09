@@ -1,5 +1,6 @@
 import { Bytes } from "@graphprotocol/graph-ts"
-import { Account } from "../../../generated/schema"
+import { entityCounters, globalState } from "."
+import { Account } from "../../generated/schema"
 
 export namespace accounts {
 
@@ -11,7 +12,10 @@ export namespace accounts {
 			entity.address = address
 			entity.createdAt = txId
 			entity.lastUpdatedAt = txId
+			globalState.helpers.updateGlobal_accounts_Counter()
 		}
+		entity.lastUpdatedAt = txId
 		return entity as Account
 	}
+
 }
