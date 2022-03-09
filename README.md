@@ -445,17 +445,57 @@ ___
 
 ## Sale
 
+This entity represents a succesful matchbetwen 2 orders, it's a common place between erc20Transactions and nftTransactions
+
 ### Stored relationships:
+
+#### erc20Token
+
+- Token: The erc20Token used to pay for this sale
+
+#### Metadata
+
+- Block: the block entity where this sale was made
+
+- Transaction: the transaction entity where this sale was made
+
+#### TimeSeries 
+
+- Minute, Hour, Day, Week: Time units where this sale was made (allow us to know the sale for each day or week, etc)
 
 
 ### Derived relationships:
 
+
+#### Orders
+
+- Orders: Orders that made this Sale, must be a 2 entries array, one Buy Order and one Sell Order
+
+#### erc20Transaction
+
+- erc20Transaction: The transaction that paid for this Sale
+
+#### nftTransactions
+
+- nftTransactions: A list of the transaction for the assets on this sale: It will contain just one element for single type sales or many elements for bundle type sales
+
 ### Example:
 
 ```graphql
-	# TODO
+	# Tokens traded in some sale
 {
-  
+	sale (
+		_id: "someSaleId" # where: `sale-${timestamp}`
+	){
+		nftTransactions {
+			contract {
+				address
+			}
+			nft {
+				id
+			}
+		}
+	}
 }
 ```
 ___
@@ -604,68 +644,3 @@ Transactions excetuted in the Ethereum virtual machine. These transacctions are 
 ### Block
 
 Each piece of the blockchains, contins a number and a timestamp and is related to orders, transactions and time series entities.
-
-# Example queries
-
-## Orders
-
-```graphql
-	# Returns a list of succesfully catched by the subgraph sorted by listingTime
-{
-	orders(
-		first: 15
-		where: {
-			yieldStatus: PART_TWO
-		}
-		orderDirection: desc
-		orderBy: listingTime, 
-	) {
-		id
-		callData
-		target { 
-			address
-		}
-	}
-}
-```
-## Time Series
-
-```graphql
-	# For minutes returns a list of block's numbers
-	# For days returns a list of order's Volume
-{
-   timeUnits{
-	   ...on Minute {
-		   block: {
-			   number
-		   }
-	   }
-	   ...on Day {
-			volume: {
-		   		ordersAmount
-	   		}
-	   }
-   }
-}
-```
-
-## Volume
-
-```graphql
-	# Minute volume for ether
-{
-   timeUnits{
-	   #token
-	   ...on MinuteVolume (
-		   where: {
-			   token: {
-				   address: "0x000..."
-			   }
-		   }
-	   ) {
-		   tokenAmount
-	   	}
-	   }
-   }
-}
-```
