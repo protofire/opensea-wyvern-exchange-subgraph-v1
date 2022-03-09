@@ -138,17 +138,42 @@ ___
 
 ## Interface: SmartContract
 
+This interface provides a common place for defining both erc20 contracts and nftContracts. It only contains information aboutocntract's address and provides relationships with other entities
+
 ### Stored relationships:
 
+- No relationships are stored in entities with this interface
 
 ### Derived relationships:
+
+- Orders: the orders where this contract was traded (as a payment token or as an nft)
+
+- Volumes: All of the volume-kind entities where this contract was traded
+
 
 ### Example:
 
 ```graphql
-	# TODO
+	# All erc20 and Nft contracts with their owners 
 {
-  
+	smartContracts {
+		address
+		... on Erc20Token{
+			balances {
+				accounts {
+					address
+				}
+			}
+		}
+		... on NftContract{
+			id
+			nfts {
+				owner {
+					address
+				}
+			}
+		}
+	}
 }
 ```
 ___
@@ -159,123 +184,318 @@ OpenSea allows the users to pay in a wide diversity of erc20 tokens and the Toke
 
 ### Stored relationships:
 
+- No relationships are stored this kind of entity
 
 ### Derived relationships:
 
+#### Accounts:
+
+- balances: a many to many relationship betwen a Erc20Token and some account with some amount of tokens
+
+#### SmartContractTransacitons:
+
+- tokenTransactions: Transactions that transfered tokens from this contract between Accounts
+
+#### Sales
+
+- Sales: Sales where this token was used as a payment token
+
+#### Orders
+
+- orders: Orders where this contract's address is stored as payment Token
+
+#### Volumes
+
+- MinuteVolume, HourVolume, DayVolume, WeekVolume: Volume entities representing the total value and transactions for a given timeframe
 ### Example:
 
 ```graphql
-	# TODO
+	# The whole list of owners of some token and the amount they hold
 {
-  
+  Erc20Token (where: {
+	address: "0xSomeErc20ContractAddres"
+  }){
+		balances {
+			amount
+			account {
+				address
+			}
+		}
+		
+	}
 }
 ```
 ___
 
 ## NftContract
 
-
 A given nft contract containning NFTs, provides a relationship between accounts trough the "Asset owner entity" and orders opened under this "target".
 
 
 ### Stored relationships:
 
+- No relationships are stored this kind of entity
 
-### Derived relationships:
+#### Derived relationships:
+
+#### SmartContractTransacitons:
+
+- tokenTransactions: Transactions that transfered some token from this contract between Accounts
+
+#### Orders
+
+- orders: Orders where this contract's address is stored as target
+
+#### Volumes
+
+- MinuteVolume, HourVolume, DayVolume, WeekVolume: Volume entities representing the total amount of tokens and transactions for a given timeframe
 
 ### Example:
 
 ```graphql
-	# TODO
+	# the whole list of owners fro a given nft contract
 {
-  
+  NftContract (where: {
+	address: "0xSomeNftContractAddres"
+  }) {
+	  nfts {
+		  id
+		  owners {
+			  address
+		  }
+	  }
+  }
 }
 ```
 ___
 ## Interface SmartContractTransaction
 
+This interface provides and standard approach to represent interactions with nft or erc20 contracts in the context of the openSea marketplace. Contains information about the sale where this transaction was triggered, the Accounts involved, the contract that stores the tokens transfered and the time when the transaction was made.
+
+Is one of the main pieces of this subgraph because relate to many other entities. It's like some sort of highway where you can go between any entitiy. 
+
 ### Stored relationships:
 
+#### Accounts
 
+- from: The account that sent the tokens
+- to: The account that recieved the tokens
+
+#### SmartContracts
+
+- contract: the erc20 or nftContract where the transfered tokens are stored
+
+#### Sales
+
+- sale: the Sale (as two succesfully matched orders) where this transacción was triggered. Each sale relates one erc20 SmartContractTransaction and can relate to one or many Nft SmartContractTransactions
+
+#### Metadata
+
+- Block: the block entity where this transaction was sent
+
+- Transaction: the transaction entity where this transaction was sent
+
+#### TimeSeries 
+
+- Minute, Hour, Day, Week: Time units where this transaction was sent (allow us to know the transactions for each day)
+
+#### Volumes
+
+- All of the volume-kind entities where this transaction was included (allow us to know which transactions the amount of tokens traded for a given timeframe)
 ### Derived relationships:
 
+- No relationship are derived to this entity
 ### Example:
 
 ```graphql
-	# TODO
+	# all of the erc20 and nft transactions made by some Account
 {
-  
+	SmartContractTransactions(
+		where:{
+			from: "0xSomeAccountAddress"
+		}
+	) {
+		... on Erc20Transaction{
+			amount
+			contract {
+				address
+			}
+		}
+		... on NftTransaction{
+			nft{
+				id
+			}
+			contract{
+				address
+			}
+		}
+	}
 }
 ```
 ___
 
 ## Erc20Transaction
 
-Any time an erc20 is traded an Erc20Transaction entity will be created. This entitiy has many relationships suchs as volume entities, time series, orders, accounts, blocks and transactions(evm).
-Allowing this subgraph to be source for many kinds of data visualizations.
+The Erc20Transaction entity will be created each time an erc20 is traded in for of a payment for a Sale (two succesfully matched orders). Be aware that a Sale will create always a single erc20Transaction since both regular and bundle orders have only one payment.
 
 ### Stored relationships:
 
+- Same es "smartContractTransaction interface" 
+
+#### Balances
+
+- increasedBalance: The Balance entity that increased the value of it's "amount" field (to track the growth of the Account's balance).
+- decreasedBalance: The Balance entity that increased the value of it's "amount" field.
 
 ### Derived relationships:
+
+- No relationship are derived to this entity
 
 ### Example:
 
 ```graphql
-	# TODO
+	# List the transactions for a given ercToken
 {
-  
+	erc20Transactions (
+		where: {
+			contract: "0xSomeErc20Address"
+		}
+	){
+		from {
+			address
+		}
+		to {
+			address
+		}
+	}
 }
 ```
 ___
 
 ## NftTransaction
 
+The NftTransaction entity will be created each time an Nft is traded in as resilt of a Sale (two succesfully matched orders). Be aware that a Sale can create one or many NftTransactions since a sale can be single or bundle asset. 
+
 ### Stored relationships:
 
+- Same es "smartContractTransaction interface" 
 
 ### Derived relationships:
+
+- No relationship are derived to this entity
 
 ### Example:
 
 ```graphql
-	# TODO
+	# All of the nfts sold by some Account
 {
-  
+	nftTransactions(
+		where:{
+			from: "0xSomeAccountAddress"
+		}
+	){
+		timestamp
+		nft{
+			id
+		}
+	}
 }
 ```
 ___
 
 ## Nft
 
+This entity represents an Nft from a erc721 or a erc1155 smart contract.
+Contains a very simple information about the tokenId, the account that holds it and the contract qhere it's stored.
+
 ### Stored relationships:
 
+#### Accounts
+- owner: an account that owns this Nft
+
+#### NftContracts
+- contract: an standar erc721 or erc1155 where this nft is stored.
 
 ### Derived relationships:
+
+#### NftTransactions
+
+- nftTransactions: All of the transactions where this Nft change it's owner
 
 ### Example:
 
 ```graphql
-	# TODO
+	# current and past owners for some Nft
 {
-  
+  nft (
+	_id: "someNftId" # where `${contractAddres}-${tokenID}`
+  ){
+	owner{
+		address
+	}
+	nftTransactions{
+		from{
+			address
+		}
+	}
+  }
 }
 ```
 ___
 
 ## Sale
 
+This entity represents a succesful matchbetwen 2 orders, it's a common place between erc20Transactions and nftTransactions
+
 ### Stored relationships:
+
+#### erc20Token
+
+- Token: The erc20Token used to pay for this sale
+
+#### Metadata
+
+- Block: the block entity where this sale was made
+
+- Transaction: the transaction entity where this sale was made
+
+#### TimeSeries 
+
+- Minute, Hour, Day, Week: Time units where this sale was made (allow us to know the sale for each day or week, etc)
 
 
 ### Derived relationships:
 
+
+#### Orders
+
+- Orders: Orders that made this Sale, must be a 2 entries array, one Buy Order and one Sell Order
+
+#### erc20Transaction
+
+- erc20Transaction: The transaction that paid for this Sale
+
+#### nftTransactions
+
+- nftTransactions: A list of the transaction for the assets on this sale: It will contain just one element for single type sales or many elements for bundle type sales
+
 ### Example:
 
 ```graphql
-	# TODO
+	# Tokens traded in some sale
 {
-  
+	sale (
+		_id: "someSaleId" # where: `sale-${timestamp}`
+	){
+		nftTransactions {
+			contract {
+				address
+			}
+			nft {
+				id
+			}
+		}
+	}
 }
 ```
 ___
@@ -424,68 +644,3 @@ Transactions excetuted in the Ethereum virtual machine. These transacctions are 
 ### Block
 
 Each piece of the blockchains, contins a number and a timestamp and is related to orders, transactions and time series entities.
-
-# Example queries
-
-## Orders
-
-```graphql
-	# Returns a list of succesfully catched by the subgraph sorted by listingTime
-{
-	orders(
-		first: 15
-		where: {
-			yieldStatus: PART_TWO
-		}
-		orderDirection: desc
-		orderBy: listingTime, 
-	) {
-		id
-		callData
-		target { 
-			address
-		}
-	}
-}
-```
-## Time Series
-
-```graphql
-	# For minutes returns a list of block's numbers
-	# For days returns a list of order's Volume
-{
-   timeUnits{
-	   ...on Minute {
-		   block: {
-			   number
-		   }
-	   }
-	   ...on Day {
-			volume: {
-		   		ordersAmount
-	   		}
-	   }
-   }
-}
-```
-
-## Volume
-
-```graphql
-	# Minute volume for ether
-{
-   timeUnits{
-	   #token
-	   ...on MinuteVolume (
-		   where: {
-			   token: {
-				   address: "0x000..."
-			   }
-		   }
-	   ) {
-		   tokenAmount
-	   	}
-	   }
-   }
-}
-```

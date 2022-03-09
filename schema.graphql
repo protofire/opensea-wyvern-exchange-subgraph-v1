@@ -508,14 +508,6 @@ type Sale @entity {
   "payment token for this sale"
   token: Erc20Token
 
-  # metadata relationships
-
-  "related evm block"
-  block: Block!
-
-  "related evm transaction"
-  transaction: Transaction!
- 
   # derived relationships
 
   "Nft transfers made for this sell"
@@ -527,6 +519,14 @@ type Sale @entity {
   "Orders that made this Sale, must be a 2 entries array, one Buy Order and one Sell Order"
   orders: [Order!]! @derivedFrom(field: "sale")
 
+  # metadata relationships
+
+  "related evm block"
+  block: Block!
+
+  "related evm transaction"
+  transaction: Transaction!
+  
   # time series relationships
 
   "related minute entity"
@@ -820,6 +820,8 @@ A volume entity relates to
 - Many erc20tx 
 - Many nftTx
 """
+
+# TODO add derived list to sales
 interface Volume {
   "internal id used for indexation"
   id: ID! # Set to `timeUnitName-${smartContract.id}-${epoch}`
