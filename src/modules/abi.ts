@@ -83,7 +83,8 @@ export namespace abi {
 		 * 					the total length of the callDatas Bytes bundle
 		 */
 
-		let mergedCallData = guardedArrayReplace(buyCallData, sellCallData, replacementPattern)
+
+		let mergedCallData = guardedArrayReplace(buyCallData, sellCallData, replacementPattern);
 		return decodeAbi_Atomicize_Method(mergedCallData)
 	}
 
@@ -221,6 +222,15 @@ export namespace abi {
 		 * 0.5 Bytes == 4 bits == 1 hex char
 		 */
 
+		/**
+		 * //TODO: Here should validate the function selector. An example of a unusual transaction would be: https://etherscan.io/tx/0xec55f609e11bb4eb2076ac1e9f306d16c88a32a22b6c3063e8b46e751cabd2d5
+		 * where no `transferFrom` is actually called.
+		 * 
+		 * Recommending to validate the function selector and only parse the bytes if it's either:
+		 * 	 - TRANSFER_FROM_SELECTOR = "0x23b872dd"
+		 *   - ERC721_SAFE_TRANSFER_FROM_SELECTOR = "0x42842e0e"
+		 *   - ERC155_SAFE_TRANSFER_FROM_SELECTOR = "0xf242432a" (partial handling, it has 2 more params: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC1155/IERC1155.sol#L99)
+		 */
 		let dataWithoutFunctionSelector = Bytes.fromUint8Array(callData.subarray(4))
 		let decoded = ethereum.decode(
 			"(address,address,uint256)", dataWithoutFunctionSelector
@@ -240,6 +250,11 @@ export namespace abi {
 	}
 
 	export function guardedArrayReplace(_array: Bytes, _replacement: Bytes, _mask: Bytes): Bytes {
+		// Sometime the replacementPattern is empty, meaning that both arrays (buyCallData and sellCallData) are identicall and
+		// no merging is necessary. In such a case randomly return the first array (buyCallData)
+		if (_mask.length == 0) {
+			return _array;
+		}
 
 		// copies Bytes Array to avoid buffer overwrite
 		let array = Bytes.fromUint8Array(_array.slice(0))
