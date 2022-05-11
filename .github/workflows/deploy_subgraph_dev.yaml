@@ -1,0 +1,42 @@
+name: "[DEV] - Build and deploy subgraph"
+
+on: [workflow_dispatch]
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    env:
+      INDEXNODE_ENDPOINT: "index.dev.protoweb3.com"
+      IPFS_ENDPOINT: "ipfs.dev.protoweb3.com"
+      SUBGRAPH_NAME: "dev/cow-subgraph"
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "12"
+
+      - name: Install graph-cli
+        run: yarn global add @graphprotocol/graph-cli@0.23.2
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Codegen
+        run: yarn codegen
+
+      - name: Build
+        run: yarn build
+
+      - name: Graph create
+        run: |
+          graph create ${{ env.SUBGRAPH_NAME }} \
+                       --version-label $GITHUB_REF_NAME \
+                       --node "https://${{ env.INDEXNODE_ENDPOINT }}" \
+                       --ipfs "https://${{ env.IPFS_ENDPOINT }}"
+
+      - name: Graph deploy
+        run: |
+          graph deploy ${{ env.SUBGRAPH_NAME }} \
+                       --version-label $GITHUB_REF_NAME \
+                       --node "https://${{ env.INDEXNODE_ENDPOINT }}" \
+                       --ipfs "https://${{ env.IPFS_ENDPOINT }}"
