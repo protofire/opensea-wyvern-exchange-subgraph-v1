@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       INDEXNODE_ENDPOINT: "index.dev.protoweb3.com"
-      IPFS_ENDPOINT: "ipfs.dev.protoweb3.com"
+      IPFS_ENDPOINT: "https://ipfs.network.thegraph.com"
       SUBGRAPH_NAME: "dev/cow-subgraph"
     steps:
       - uses: actions/checkout@v2
