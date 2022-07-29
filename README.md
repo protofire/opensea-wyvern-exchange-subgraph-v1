@@ -1,8 +1,11 @@
-# OpenSea: Wyvern Exchange
+# OpenSea: Wyvern Exchange v1
 _Made by Protoire.io under MIT License_
 
 "The world’s first and largest digital marketplace for crypto collectibles and non-fungible tokens (NFTs). Buy, sell, and discover exclusive digital items."
  > https://opensea.io/
+
+[IMPORTANT NOTE]
+This subgraph was tested only for the wyvern exchange v1 contract. It doesn't garantee support for v2
 
 This subgraph custom approach based on the orders book and assets management trough an time series entities model and it's complemented w/ a layer of metadata such as block and transaction information. 
 
