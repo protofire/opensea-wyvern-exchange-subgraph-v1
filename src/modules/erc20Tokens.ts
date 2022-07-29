@@ -4,7 +4,7 @@ import { Erc20Transaction, Erc20Token } from "../../generated/schema"
 
 export namespace erc20Tokens {
 	export function getOrCreateToken(address: Bytes): Erc20Token {
-		let id = address.toHex()
+		let id = `erc20-${address.toHexString()}`
 		let entity = Erc20Token.load(id)
 		if (entity == null) {
 			entity = new Erc20Token(id)

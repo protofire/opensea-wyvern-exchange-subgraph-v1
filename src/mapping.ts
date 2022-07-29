@@ -187,14 +187,16 @@ export function handleAtomicMatch_(call: AtomicMatch_Call): void {
 
 
   } else {
-    let decoded = abi.decodeSingleNftData(
-      buyOrder.callData!, sellOrder.callData!, buyOrder.replacementPattern!
-    );
-    mappingHelpers.handleSingleSale(
-      decoded, metadataResult.txId, call.inputs.addrs[11],
-      paymentToken.id, matchPrice, timestamp, timeSeriesResult,
-      metadataResult
-    )
+    let mergedCallData = abi.guardedArrayReplace(buyOrder.callData!, sellOrder.callData!, buyOrder.replacementPattern!)
+    if (abi.checkCallDataFunctionSelector(mergedCallData)) {
+
+      let decoded = abi.decodeAbi_transferFrom_Method(mergedCallData)
+      mappingHelpers.handleSingleSale(
+        decoded, metadataResult.txId, call.inputs.addrs[11],
+        paymentToken.id, matchPrice, timestamp, timeSeriesResult,
+        metadataResult
+      )
+    }
 
   }
 }

@@ -8,7 +8,7 @@ export namespace nftContracts {
 		return entity as NftContract
 	}
 	export function getOrCreateNftContract(address: Bytes): NftContract {
-		let id = address.toHex()
+		let id = `nft-${address.toHexString()}`
 		let entity = NftContract.load(id)
 		if (entity == null) {
 			entity = new NftContract(id)
